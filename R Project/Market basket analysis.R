@@ -24,11 +24,12 @@ setwd(dirname(current_path))
 getwd()
 setwd("..")
 setwd("Data")
-transactions_raw <- read.transactions(file = "ElectronidexTransactions2017.csv", header = FALSE, format = "basket", sep = ",")# rm.duplicates = FALSE)
+transactions_raw <- read.transactions(file = "ElectronidexTransactions2017.csv", 
+                                      header = FALSE, format = "basket", sep = ",")# rm.duplicates = FALSE)
 df_transactions <- read.csv("ElectronidexTransactions2017.csv")
 tO_transactions <-as(df_transactions,"transactions")
 
-# 1. EXploring - Get to know the data
+#### 1. Exploring - Get to know the data ####
 transactions_raw
 summary(transactions_raw)
 
@@ -38,9 +39,25 @@ size (transactions_raw)         # Number of items per transaction
 LIST(transactions_raw)          # Lists the transactions by conversion (LIST must be capitalized)
 itemLabels(transactions_raw)    # To see the item labels
 
-#Create an item frequency plot
-itemFrequencyPlot(transactions_raw, topN = 15, type = "absolute", col = brewer.pal(8,'Pastel2'), main = "Absolute Item Frequency Plot")
-image(transactions_raw[c(2500:3000)])
-image(sample(transactions_raw, size = 200)) # of Transactions you'd like to plot))
+##Visualization
+# Create an item frequency plot
+itemFrequencyPlot(transactions_raw, topN = 15, type = "absolute", horiz = TRUE,
+                  col = brewer.pal(8,'Pastel2'), main = "Absolute frequency of Top 15 items", 
+                  xlab = "Item frequency")
 
-      
+# Plot image of distribution of random items
+image(sample(transactions_raw[1:300]))
+image(sample(transactions_raw, size = 300)) # of Transactions you'd like to plot))
+
+
+#### 3. Applying ####
+##Apriori algorithm
+#-Apriori algorithm: helpful for large datasets and is used to uncover insights pertaining transactional datasets
+#It is based on item frequency. E.g.: Item set {I1, I2, I3, I4} can only occur if items {I1}, {I2}, {I3} and {I4} 
+#occur just as frequently.
+#-Apriori assesses association rules using two types of measurements
+#1. Stat. measure - Support measurement: measures itemsets or rules frequency within transactional data.
+#2. Stat. measure - Confidence measurement, measures accuracy of the rules. 
+#--> Rules that measure high in both support and confidence == strong rule
+#Important: correlation does not imply causation! E.g.{I1} -> {I2} != {I2} -> {I1}
+#
