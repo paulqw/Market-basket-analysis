@@ -24,6 +24,8 @@ setwd(dirname(current_path))
 getwd()
 setwd("..")
 setwd("Data")
+#trans_csv <- read.csv("ElectronidexTransactions2017.csv")
+
 transactions_raw <- read.transactions(file = "ElectronidexTransactions2017.csv", 
                                       header = FALSE, format = "basket", sep = ",")# rm.duplicates = FALSE)
 df_trans_log <- data.frame(as(transactions_raw, "matrix"))
@@ -36,6 +38,25 @@ for (i in c(1:nrow(df_trans_bin))){
   }
 }
 
+#### 0. Item labels ####
+#Matching old item 
+iL <- itemLabels(transactions_raw)
+
+iL_new <- as.vector(read.csv("itemlabel_new.csv"))
+iL_n <- iL_new[,1]
+
+for (i in 1:125) {
+  old <- iL[i]
+  for (j in 1:125) {
+  rownum_new <- which(iL_new[, 1] == old, arr.ind = TRUE) 
+  }
+}
+
+agrep(as.character(old), as.character(iL_new[c(1:25), 1]), ignore.case = FALSE, value = TRUE,
+      max.distance = 10)
+
+#Renaming items to new itemnames
+#itemLabels(transaction) <- c("nail","Black Hammer 127","White desk 12","green desk","
 
 #### 1. Exploring - Get to know the data ####
 transactions_raw
@@ -77,7 +98,7 @@ image(sample(transactions_raw, size = 300)) # of Transactions you'd like to plot
 
 ##Out of the box
 #rules cover 10% of the transactions(supp = .1) and are 80% correct (conf = .8)
-rules <- apriori(transactions_raw, parameter = list(supp = 0.0007, conf = 0.95, minlen = 2)) #first rules using supp = 0.001 and
+rules <- apriori(transactions_raw, parameter = list(supp = 0.0007, conf = 0.90, minlen = 2, maxlen = 10)) #first rules using supp = 0.001 and
 #0.0009 0.95 --> 98 rules
 
 func_redundant(rules) 
@@ -89,8 +110,10 @@ inspect(rules_sorted)
 summary(rules_sorted)
 
 plot(rules_sorted)
-plotly_arules(rules_sorted[1:5])    #for interactive plots
-plot(rules_sorted[1:5], method = "graph", control = list(type = "items", reorder = TRUE))
+inspectDT(rules_sorted)             #interactive inspect
+plotly_arules(rules_sorted[1:5],  #for interactive plots
+              engine = "htmlwidget")   #interactive plot 
+plot(rules_sorted[1:5], method = "two-key plot", control = list(type = "items", reorder = TRUE))
 plot(rules_sorted[1:10], method = "paracoord", control = list(type = "items", reorder = TRUE))
 
 #Meaning of values:
