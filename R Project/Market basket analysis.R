@@ -1,4 +1,4 @@
-# Load libraries
+#### Load libraries & Setup ####
 install.packages("pacman")
 library(pacman)
 p_load(caret, lattice, readr, Metrics, corrplot, e1071, mlr, recipes, ggplot2, 
@@ -8,7 +8,8 @@ p_load(caret, lattice, readr, Metrics, corrplot, e1071, mlr, recipes, ggplot2,
        randomForest, rstudioapi, MASS, ParamHelpers, mlr,
        arules,      # analyzing transactional data
        arulesViz,    # provides visual techniques for the arules package.
-       RColorBrewer
+       RColorBrewer,
+       plyr
        )
 
 # Enable parallel computing
@@ -18,45 +19,97 @@ registerDoParallel(cl)
 # Disable scientific notation
 options(scipen = 999)
 
-#Loading dataset(s)
+#### Loading data ####
 current_path = getActiveDocumentContext()$path
 setwd(dirname(current_path))
 getwd()
 setwd("..")
 setwd("Data")
-#trans_csv <- read.csv("ElectronidexTransactions2017.csv")
 
+## Electronidex ##
+#Load transaction into class transaction (sparse matrix)
 transactions_raw <- read.transactions(file = "ElectronidexTransactions2017.csv", 
-                                      header = FALSE, format = "basket", sep = ",")# rm.duplicates = FALSE)
-df_trans_log <- data.frame(as(transactions_raw, "matrix"))
+                                      header = FALSE, format = "basket", sep = ",", rm.duplicates = TRUE)# rm.duplicates = FALSE)
+#Load transaction into class df
+df_raw <- read.csv("ElectronidexTransactions2017.csv", header = FALSE)
 
+#Load itemlevels (new name, brand, category) into class df
+df_names <- read.csv("List_itemNames.csv")
+
+brand <- read.csv("il_brand.csv")
+brand_vector <- as.character(brand$brand)
+
+#Safe itemNames
+write.table(itemLabels(transactions_raw), file = "List_itemNames.csv", sep = ",")
+
+## Blackwell Electronics ##
+be_ex <- read.csv("blackwell_existing.csv", header = TRUE)
+be_new <- read.csv("blackwell_new.csv", header = TRUE)
+
+#### Prepare data ####
+#Change data type of df to character 
+for(i in c(1:32)){
+  df_raw[,i] <- as.character(df_raw[,i])
+}
+str(df_raw)
+
+#Change data type of df itemLevels
+for(i in c(1:ncol(df_names))){
+  df_names[, i] <- as.character(df_names[, i])
+}
+
+#Transfer transaction matrix via logical into binary
+df_trans_log <- data.frame(as(transactions_raw, "matrix"))
 df_trans_bin <- df_trans_log
 
-for (i in c(1:nrow(df_trans_bin))){
-  for (j in c(1:ncol(df_trans_bin))){
-    df_trans_bin[i, j] <- as.integer(df_trans_bin[i, j]) 
-  }
-}
+for (i in c(1:ncol(df_trans_bin))){
+  df_trans_bin[, i] <- as.integer(df_trans_bin[, i]) 
+}  
 
 #### 0. Item labels ####
-#Matching old item 
-iL <- itemLabels(transactions_raw)
+#Getting il_raw
+il_raw <- itemLabels(transactions_raw)
 
-iL_new <- as.vector(read.csv("itemlabel_new.csv"))
-iL_n <- iL_new[,1]
+#Getting brand level (brand search)
 
-for (i in 1:125) {
-  old <- iL[i]
-  for (j in 1:125) {
-  rownum_new <- which(iL_new[, 1] == old, arr.ind = TRUE) 
+df_names[, "brand_found"] <- NA
+
+for (i in c(brand_vector)) {
+  for (j in c(1:125)) {
+    items_found <- agrep(as.character(i), df_names[, which(colnames(df_names) == "il_raw")],  max.distance = 0, 
+                         ignore.case = TRUE, value = FALSE)
+    df_names[c(items_found), which(colnames(df_names) == "brand_found")] <- i
   }
 }
 
-agrep(as.character(old), as.character(iL_new[c(1:25), 1]), ignore.case = FALSE, value = TRUE,
-      max.distance = 10)
+#Renaming items to new itemnames --> aggregate itemLevels
+df <- df_raw
+for (k in c(1:125)) {
+  on <- as.character(df_names[k, which(colnames(df_names) == "il_raw")])
+  nn <- as.character(df_names[k, which(colnames(df_names) == "il_new")])
+  for (i in c(1:32)){
+    for (j in c(1:9835))
+         df[j, i] <- replace(df[j, i], df[j, i] == on, nn)
+  }
+}
 
-#Renaming items to new itemnames
-#itemLabels(transaction) <- c("nail","Black Hammer 127","White desk 12","green desk","
+#Possible other options:
+#1. mgsub(df, pattern = "Acer Aspire", replacement = nn)
+#2. which(grepl(on, df[i, j], ignore.case = TRUE))] <- nn
+#3. #within(df[, 1] == sn) <- as.character(df_names[k, 4])
+
+#Attempt to renamw in transaction data
+#e.g. itemLabels(transaction) <- c("nail","Black Hammer 127","White desk 12","green desk")
+#Does not work for purpose of item reduction as itemLabels only allow for unique labels
+#-->Add new itemlevel and save new transaction dataset by these itemlevel
+transactions_raw@itemInfo$il_new <- df_names$il_new
+transactions_raw@itemInfo$brand <- df_names$brand
+transactions_raw@itemInfo$category <- df_names$category
+
+trans_il_new <- arules::aggregate(transactions_raw, by = "il_new")
+trans_brand <- arules::aggregate(transactions_raw, by = "brand")
+trans_category <- arules::aggregate(transactions_raw, by = "category")
+df_trans_cat <- data.frame(as(transactions_raw, "matrix"))
 
 #### 1. Exploring - Get to know the data ####
 transactions_raw
@@ -78,6 +131,60 @@ itemFrequencyPlot(transactions_raw, topN = 30, type = "absolute", horiz = TRUE,
 image(sample(transactions_raw[1:300]))
 image(sample(transactions_raw, size = 300)) # of Transactions you'd like to plot))
 
+#### Compare Blackwell Electronix and Electronidex ####
+## Prepare portfolio of Blackwell Electronix ##
+#be_portfolio <- rbind(be_ex[, c(1:3, 17:18)],be_new[c(1:4, 7), c(1:3, 17:18)]) #w/ price, margin, and volume
+be_products <- rbind(be_ex[-c(35:41), c(1:2,18)],be_new[c(1:4, 7), c(1:2,18)])
+pred_vol_new <- c(152, 267, 225, 77, 734)
+be_products[c(74:78), 3] <- pred_vol_new
+names(be_products) <- c("category", "ProductNum", "volume")
+be_categories <- as.character(unique(be_products$category))   #not required
+be_portfolio <- setNames(data.frame(matrix(ncol = length(be_categories), nrow = 0)), c(be_categories))
+vol_agg <- data.frame(aggregate(be_products$volume, by = list(be_products$category), FUN = sum))
+              
+for (i in be_categories) {
+  be_portfolio[1, which(colnames(be_portfolio) == i)] <- vol_agg[which(vol_agg$Group.1 == i), 2]
+}
+
+## Prepare portfolio of Electronidex ##
+df_trans_category <- data.frame(as(trans_category, "matrix"))
+ei_portfolio <- setNames(data.frame(matrix(ncol = ncol(df_trans_category), nrow = 0)), c(colnames(df_trans_category)))
+for (i in c(1:ncol(df_trans_category))){
+  ei_portfolio[1,i] <- length(which(df_trans_category[,i] == TRUE))
+}
+
+## Merge visualize portfolios from Blackwell and Electronix
+#Merged via excel using be_portoflio and ei_portfolio
+merged_portfolios <- read.csv("portfolio_comparison.csv")
+
+gg_vol <- ggplot(merged_portfolios, aes(x = category, y = volume)) + 
+          facet_grid(company ~.) + 
+          geom_col(aes(fill = category)) + 
+          scale_color_brewer(palette = "Dark2") +
+          ylim(0, 26000) + 
+          theme(strip.text = element_text(face="bold", size = 12), 
+                strip.background = element_rect(fill = "lightblue", colour = "black", size = 0.8)) + 
+          theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12)) + 
+          theme(axis.text = element_text(size = 12)) + 
+          theme(axis.title = element_text(size = 15)) +
+          xlab("Product Category") + ylab("Volume(Sum)") + 
+          ggtitle("Product portfolios of Blackwell and Electronix") + 
+          theme(title = element_text(size = 15)) + 
+          theme(legend.position = "none")
+
+gg_port <- ggplot(merged_portfolios, aes(x = category, y = portion)) + 
+           facet_grid(company ~.) + 
+           geom_col(aes(fill = category)) + 
+           theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12)) + 
+           #scale_x_continuous(breaks = round(seq(min(dat$x), max(dat$x), by = 0.5),1)) +
+           theme(axis.text = element_text(size = 12)) + 
+           theme(axis.title = element_text(size = 15)) +
+           xlab("Product Category") + ylab("Portion(in %)") + 
+           ggtitle("Product portfolios of Blackwell and Electronix") + 
+           theme(title = element_text(size = 15)) + 
+           theme(legend.position = "none")
+
+ggarrange(gg_vol, gg_port, ncol = 1, nrow = 2)
 
 #### 3. Applying ####
 ##Apriori algorithm
