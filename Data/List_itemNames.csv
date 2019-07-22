@@ -1,0 +1,126 @@
+item.ID,il_raw,category,brand,il_new,il_pdf
+1,1TB Portable External Hard Drive,External Hardrives,NN,Portable HDD,1TB Portable External Hard Drive
+2,2TB Portable External Hard Drive,External Hardrives,NN,Portable HDD,2TB Portable External Hard Drive
+3,3-Button Mouse,Mouse,NN,NN MiKey,3-Button Mouse 
+4,3TB Portable External Hard Drive,External Hardrives,NN,Portable HDD,3TB Portable External Hard Drive
+5,5TB Desktop Hard Drive,External Hardrives,NN,Desktop HDD,5TB Desktop Hard Drive
+6,Acer Aspire,Laptop,Acer,Acer Laptop,Acer Aspire
+7,Acer Desktop,Desktop,Acer,Acer Desktop,Acer Desktop
+8,Acer Monitor,Monitor,Acer,Acer Monitor,Acer Monitor
+9,Ailihen Stereo Headphones,Computer Headphones,Ailihe,NN Headset,Ailihen Stereo Headphones
+10,Alienware Laptop,Laptop,Alienware,Alienware Laptop,"Alienware AW17R4-7345SLV-PUS 17"" Laptop"
+11,AOC Monitor,Monitor,AOC,NN Monitor,AOC Monitor
+12,APIE Bluetooth Headphone,Active Headphones,APIE,NN Headset,APIE Bluetooth Headphones
+13,Apple Earpods,Active Headphones,Apple,Apple Headphones,Apple Earpods
+14,Apple MacBook Air,Laptop,Apple,Apple Laptop,Apple MacBook Air
+15,Apple MacBook Pro,Laptop,Apple,Apple Laptop,Apple Macbook Pro
+16,Apple Magic Keyboard,Keyboard,Apple,Apple Mikey,Apple Magic Keyboard
+17,Apple TV,Smart Home Devices,Apple,Apple Home,Apple TV
+18,Apple Wired Keyboard,Keyboard,Apple,Apple Mikey,Apple Wired Keyboard
+19,Apple Wireless Keyboard,Keyboard,Apple,Apple Mikey,Apple Wireless Keyboard
+20,ASUS 2 Monitor,Monitor,Asus,ASUS Monitor,ASUS 2 Monitor
+21,ASUS Chromebook,Laptop,Asus,Asus Laptop,ASUS Chromebook
+22,ASUS Desktop,Desktop,Asus,ASUS Desktop,ASUS Desktop
+23,ASUS Monitor,Monitor,Asus,ASUS Monitor,ASUS Monitor
+24,Audio Cable,Computer Cords,NN,Audio Cords,Audio Cable
+25,Backlit LED Gaming Keyboard,Keyboard,NN,Gaming Mikey,Backlit LED Gaming Keyboard
+26,Belkin Mouse Pad,Accessories,Belkin,Mpad Accessories,Belkin Mouse Pad
+27,Bose Companion Speakers,Speakers,Bose,Bose Speakers,Bose Companion Speakers
+28,Brother Printer,Printers,Brother,Brother Printer,Brother Printer
+29,Brother Printer Toner,Printer Ink,Brother,Brother Ink,Brother Printer Toner
+30,Cambridge Bluetooth Speaker,Speakers,Cambridge,Cambridge Speaker,Cambridge Bluetooth Speaker
+31,Canon Ink,Printer Ink,Canon,Canon Ink,Canon Ink 
+32,Canon Office Printer,Printers,Canon,Canon Printer,Canon Office Printer
+33,Computer Game,Accessories,NN,Game Accessories,Computer Game
+34,Cyber Acoustics,Speakers,NN,CA Speakers,Cyber Acoustics
+35,CYBERPOWER Gamer Desktop,Desktop,Cyberpower,CYBERPOWER Desktop,CYBERPOWER Gamer Desktop
+36,Dell 2 Desktop,Desktop,Dell,Dell 2 Desktop,Dell 2 Desktop
+37,Dell Desktop,Desktop,Dell,Dell Desktop,Dell Desktop
+38,Dell KM117 Wireless Keyboard & Mouse,Mouse and Keyboard,Dell,Dell MiKey,Dell KM117 Wireless Keyboard & Mouse
+39,Dell Laptop,Laptop,Dell,Dell Laptop,Dell Laptop
+40,Dell Monitor,Monitor,Dell,Dell Monitor,Dell Monitor
+41,Dell Wired Keyboard,Keyboard,Dell,Dell MiKey,Dell Wired Keyboard
+42,DOSS Touch Wireless Bluetooth,Speakers,DOSS,DOSS Speakers,DOSS Touch Wireless Bluetooth
+43,DYMO Label Manker,Printers,DYMO,DYMO Printer,DYMO Label Manker
+44,DYMO Labeling Tape,Printer Ink,DYMO,DYMO Ink,DYMO Labeling Tape 
+45,EagleTec Wireless Combo Keyboard and Mouse,Mouse and Keyboard,EagleTec,NN MiKey,EagleTec Wireless Combo Keyboard and Mouse
+46,Eluktronics Pro Gaming Laptop,Laptop,Eluktronics,Eluktronics Laptop,Eluktronics Pro Gaming Laptop
+47,Epson Black Ink,Printer Ink,Epson,Epson Ink,Epson Black Ink
+48,Epson Printer,Printers,Epson,Epson Printer,Epson Printer
+49,Etekcity Power Extension Cord Cable,Computer Cords,Etekcity,Power Cords,Etekcity Power Extension Cord Cable
+50,Ethernet Cable,Computer Cords,NN,Ethernet Cords,Ethernet Cable
+51,Fire HD Tablet,Computer Tablets,Fire,Amazon Tablets,Fire HD Tablet
+52,Fire TV Stick,Smart Home Devices,Fire,Amazon Home,Fire TV Stick
+53,Full Motion Monitor Mount,Computer Stands,NN,NN Stand,Full Motion Monitor Mount
+54,Gaming Mouse Professional,Mouse,NN,Gaming Mikey,Gaming Mouse Professional
+55,Generic Black 3-Button,Mouse,NN,NN MiKey,Generic Black 3-Button
+56,Google Home,Smart Home Devices,Google,Google Home,Google Home
+57,Halter Acrylic Monitor Stand,Computer Stands,Halter,NN Stand,Halter Acrylic Monitor Stand
+58,Halter Mesh Metal Monitor Stand,Computer Stands,Halter,NN Stand,Halter Mesh Metal Monitor Stand
+59,HDMI Adapter,Computer Cords,NN,HDMI Cords,HDMI Adapter
+60,HDMI Cable 6ft,Computer Cords,NN,Display Cords,HDMI Cable 6ft
+61,Height-Adjustable Standing Desk,Computer Stands,NN,NN Stand,Height-Adjustable Standing Desk
+62,HP Black & Tri-color Ink,Laptop,HP,HP Ink,HP Black & Tri-color Ink 
+63,HP Desktop,Printer Ink,HP,HP Desktop,HP Desktop
+64,HP Laptop,Desktop,HP,HP Laptop,HP Laptop
+65,HP Monitor,Monitor,HP,HP Monitor,HP Monitor
+66,HP Notebook Touchscreen Laptop PC,Laptop,HP,HP Laptop,HP Notebook Touchscreen Laptop PC
+67,HP USB Keyboard,Keyboard,HP,HP Mikey,HP USB Keyboard 
+68,HP Wireless Mouse,Mouse,HP,HP Mikey,HP Wireless Mouse
+69,HP Wireless Printer,Printers,HP,HP Printer,HP Wireless Printer
+70,iMac,Desktop,Apple,iMac,iMac
+71,Intel Desktop,Desktop,Intel,Intel Desktop,Intel Desktop
+72,iPad,Computer Tablets,Apple,Apple Tablets,iPad
+73,iPad Pro,Computer Tablets,Apple,Apple Tablets,iPad Pro 
+74,iPhone Charger Cable,Computer Cords,Apple,Apple Cords,iPhone Charger Cable
+75,JBL Splashproof Portable Bluetooth Speaker,Speakers,JBL,JBL Speaker,JBL Splashproof Portable Bluetooth Speaker
+76,Kensington Headphones,Computer Headphones,Kensington,Kensington Headset,Kensington Headphones 
+77,Kindle,Computer Tablets,Kindle,Amazon Tablets,Kindle 
+78,Koss Home Headphones,Computer Headphones,Koss,NN Headset,Koss Home Headphones
+79,Large Mouse Pad,Accessories,NN,Mpad Accessories,Large Mouse Pad
+80,Lenovo Desktop Computer,Desktop,Lenovo,Lenovo Desktop,Lenovo Desktop Computer
+81,LG Monitor,Monitor,LG,LG Monitor,LG Monitor
+82,LG Touchscreen Laptop,Laptop,LG,LG Laptop,LG Touchscreen Laptop
+83,Logitech 3-button Mouse,Mouse,Logitech,Logitech MiKey,Logitech 3-button Mouse
+84,Logitech ClearChat Headset,Computer Headphones,Logitech,Logitech Headset,Logitech ClearChat Headset
+85,Logitech Desktop MK120 Mouse and keyboard Combo,Mouse and Keyboard,Logitech,Logitech MiKey,Logitech Desktop MK120 Mouse and keyboard Combo
+86,Logitech Keyboard,Keyboard,Logitech,Logitech MiKey,Logitech Keyboard
+87,Logitech MK270 Wireless Keyboard and Mouse Combo,Mouse and Keyboard,Logitech,Logitech MiKey,Logitech MK270 Wireless Keyboard and Mouse Combo
+88,Logitech MK360 Wireless Keyboard and Mouse Combo,Mouse and Keyboard,Logitech,Logitech MiKey,Logitech MK360 Wireless Keyboard and Mouse Combo
+89,Logitech MK550 Wireless Wave Keyboard and Mouse Combo,Mouse and Keyboard,Logitech,Logitech MiKey,Logitech MK550 Wireless Wave Keyboard and Mouse Combo
+90,Logitech Multimedia Speakers,Speakers,Logitech,Logitech Speakers,Logitech Multimedia Speakers
+91,Logitech Stereo Headset,Computer Headphones,Logitech,Logitech Headset,Logitech Stereo Headset 
+92,Logitech Wireless Keyboard,Keyboard,Logitech,Logitech MiKey,Logitech Wireless Keyboard
+93,Logitech Wireless Mouse,Mouse,Logitech,Logitech MiKey,Logitech Wireless Mouse
+94,Mackie CR Speakers,Speakers,Mackie,Mackie Speakers,Mackie CR Speakers
+95,Microsoft Basic Optical Mouse,Mouse,Microsoft,Microsoft Mikey,Microsoft Basic Optical Mouse
+96,Microsoft Headset,Computer Headphones,Microsoft,Microsoft Headset,Microsoft Headset
+97,Microsoft Office Home and Student 2016,Accessories,Microsoft,Microsoft Accessories,Microsoft Office Home and Student 2016 
+98,Microsoft Wireless Comfort Keyboard and Mouse,Mouse and Keyboard,Microsoft,Microsoft Mikey,Microsoft Wireless Comfort Keyboard and Mouse
+99,Microsoft Wireless Desktop Keyboard and Mouse,Mouse and Keyboard,Microsoft,Microsoft Mikey,Microsoft Wireless Desktop Keyboard and Mouse
+100,Monster Beats By Dr Dre,Active Headphones,Apple,Beats Headphones,Monster Beats By Dr Dre
+101,Multi Media Stand,Computer Stands,NN,NN Stand,Multi Media Stand
+102,Otium Wireless Sports Bluetooth Headphone,Active Headphones,NN,NN Headset,Otium Wireless Sports Bluetooth Headphones 
+103,Panasonic In-Ear Headphone,Active Headphones,Panasonic,Panasonic Headset,Panasonic In-Ear Headphone
+104,Panasonic On-Ear Stereo Headphones,Computer Headphones,Panasonic,Panasonic Headset,Panasonic On-Ear Stereo Headphones RP-HT21
+105,PC Gaming Headset,Computer Headphones,NN,Gaming Headset,PC Gaming Headset
+106,Philips Flexible Earhook Headphone,Active Headphones,Philips,Philips Headphones,Philips Flexible Earhook Headphones
+107,Redragon Gaming Mouse,Mouse,Redragon,Redragon Mikey,Redragon Gaming Mouse 
+108,Rii LED Gaming Keyboard & Mouse Combo,Mouse and Keyboard,Rii,Rii Mikey,Rii LED Gaming Keyboard & Mouse Combo 
+109,Rii LED Keyboard,Keyboard,Rii,NN MiKey,Rii LED Keyboard
+110,Rokono Mini Speaker,Speakers,Rokono,Rokono Mini Speaker,Rokono Mini Speaker
+111,Roku Express,Smart Home Devices,NN,NN Home,Roku Express
+112,Samsung Charging Cable,Computer Cords,Samsung,Samsung Cords,Samsung Charging Cable
+113,Samsung Galaxy Tablet,Computer Tablets,Samsung,Samsung Tablets,Samsung Galaxy Tab
+114,Samsung Monitor,Monitor,Samsung,Samsung Monitor,Samsung Monitor
+115,Sceptre Monitor,Monitor,Sceptre,NN Monitor,Sceptre Monitor
+116,Slim 2TB Portable External Hard Drive,External Hardrives,NN,Portable HDD,Slim 2TB Portable External Hard Drive
+117,Slim Wireless Mouse,Mouse,NN,NN MiKey,Slim Wireless Mouse
+118,Smart Light Bulb,Smart Home Devices,NN,NN Home,Smart Light Bulb
+119,Sonos,Speakers,Sonos,Sonos Speakers,Sonos
+120,USB Cable,Computer Cords,NN,USB Cords,USB Cable
+121,VGA Monitor Cable,Computer Cords,NN,Display Cords,VGA Monitor Cable 
+122,ViewSonic Monitor,Monitor,NN,NN Monitor,ViewSonic Monitor
+123,Wireless Portable Mouse,Mouse,NN,NN MiKey,Wireless Portable Mouse
+124,XIBERIA Gaming Headset,Computer Headphones,XIBERIA,Gaming Headset,XIBERIA Gaming Headset
+125,Zombie Gaming Headset,Computer Headphones,Zombie,Gaming Headset,Zombie Gaming Headset
