@@ -8,9 +8,9 @@ Date: 23/07/2019
   
 **Goal of analysis:** The goal of analysis is to perform a market basket analysis on Electronidex transaction data to discover customer buying patterns, market segments Electronidex serves and relations between certain products purchased. This analysis aims at recommendations on strategic fit of both companies and the business impact of BE's ecommerce associated with acquisition.      
 
-## Technical approach  
+## Technical approach of analysis  
   
-**1. Preparation of data**  
+**1. Exploration and preparation of data**  
   
 **2. Comparison of product portfolio**    
 Visualize the product portfolio of both companies to draw insights on differences and similarities.  

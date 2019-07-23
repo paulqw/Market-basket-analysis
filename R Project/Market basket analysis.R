@@ -131,7 +131,7 @@ itemFrequencyPlot(transactions_raw, topN = 30, type = "absolute", horiz = TRUE,
 image(sample(transactions_raw[1:300]))
 image(sample(transactions_raw, size = 300)) # of Transactions you'd like to plot))
 
-#### Compare Blackwell Electronix and Electronidex ####
+#### 2. Compare Blackwell Electronix and Electronidex ####
 ## Prepare portfolio of Blackwell Electronix ##
 #be_portfolio <- rbind(be_ex[, c(1:3, 17:18)],be_new[c(1:4, 7), c(1:3, 17:18)]) #w/ price, margin, and volume
 be_products <- rbind(be_ex[-c(35:41), c(1:2,18)],be_new[c(1:4, 7), c(1:2,18)])

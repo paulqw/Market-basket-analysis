@@ -3,21 +3,22 @@ title: "**Market basket analysis - documentation**"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
 #### Load libraries & Setup ####
-install.packages("pacman")
+#install.packages("pacman")
 library(pacman)
 p_load(caret, lattice, readr, Metrics, corrplot, e1071, mlr, recipes, ggplot2, 
        C50, party, reshape, dplyr,markdown, ggpubr, tidyr, hydroGOF, BBmisc, 
        tidyverse, textclean, inum, doParallel, Hmisc, caretEnsemble, mboost, 
-       cluster, ade4, factoextra, asbio, FactoMineR, fpc,e1071, 
+       clsuter, ade4, factoextra, asbio, FactoMineR, fpc,e1071, 
        randomForest, rstudioapi, MASS, ParamHelpers, mlr,
        arules,      # analyzing transactional data
        arulesViz,    # provides visual techniques for the arules package.
        RColorBrewer,
-       plyr
+       plyr,
+       here         #relative path
        )
 
 # Enable parallel computing
@@ -26,6 +27,11 @@ registerDoParallel(cl)
 
 # Disable scientific notation
 options(scipen = 999)
+
+# File directory
+RPROJ <- list(PROJHOME = normalizePath(getwd()))
+attach(RPROJ)
+rm(RPROJ)
 ```
 
 # Executive summary  
@@ -47,87 +53,383 @@ xyz
 # Technical documentation  
   
 **Table of contents**  
-0. [Loading data](#Loading data) 
-1. [Data exploration & pre-processing](#Data exploration & pre-processing) 
-    1.1 [Placeholder](#Placeholder)    
+1. [Data exploration & pre-processing](#Data exploration & pre-processing)  
+    1.1 [Placeholder](#Placeholder)  
 2. [Comparison of product portfolio](#Comparison)  
 3. [Analysis on customer segments (B2C, B2B)](#Customer segments)  
 4. [Association rules mining](#Association rules)  
 5. [Selection of rules](#Selection of rules)  
 
-<a name="Loading data"></a>  
-  
-## 0. Loading data  
-  
 ```{r Loading data, message = FALSE, warning = FALSE, include = FALSE}
 #### Loading data ####
-current_path = getActiveDocumentContext()$path
-setwd(dirname(current_path))
-getwd()
-setwd("..")
-setwd("Data")
 
 ## Electronidex ##
 #Load transaction into class transaction (sparse matrix)
-transactions_raw <- read.transactions(file = "ElectronidexTransactions2017.csv", 
+
+transactions_raw <- read.transactions(file = here("Data", "ElectronidexTransactions2017.csv"), 
                                       header = FALSE, format = "basket", sep = ",", rm.duplicates = TRUE)# rm.duplicates = FALSE)
 #Load transaction into class df
-df_raw <- read.csv("ElectronidexTransactions2017.csv", header = FALSE)
+df_raw <- read.csv(file = here("Data", "ElectronidexTransactions2017.csv"), header = FALSE)
 
 #Load itemlevels (new name, brand, category) into class df
-df_names <- read.csv("List_itemNames.csv")
+df_names <- read.csv(file = here("Data", "List_il_new.csv"), header = TRUE)
 
-brand <- read.csv("il_brand.csv")
+brand <- read.csv(file = here("Data", "il_brand.csv"), header = TRUE)
 brand_vector <- as.character(brand$brand)
 
 #Safe itemNames
-write.table(itemLabels(transactions_raw), file = "List_itemNames.csv", sep = ",")
+write.table(itemLabels(transactions_raw), file = here("Data", "itemLabels_raw.csv"), sep = ",")
 
 ## Blackwell Electronics ##
-be_ex <- read.csv("blackwell_existing.csv", header = TRUE)
-be_new <- read.csv("blackwell_new.csv", header = TRUE)
+be_ex <- read.csv(file = here("Data", "blackwell_existing.csv"), header = TRUE)
+be_new <- read.csv(file = here("Data", "blackwell_new.csv"), header = TRUE)
+```
+  
+<a name="Exploration and preparation of data"></a>  
+  
+  
+## 1. Exploration and preparation of data  
+  
+```{r Data exploration, echo = FALSE, message = FALSE, warning = FALSE}
+## 1. Exploring - Get to know the data ## 
+transactions_raw
+summary(transactions_raw) 
+sum(size(transactions_raw))/length (transactions_raw)  #Avg. transaction size
+
+##Visualization 
+# Create an item frequency plot
+itemFrequencyPlot(transactions_raw, topN = 20, type = "absolute", horiz = TRUE, 
+                  col = brewer.pal(8,'Pastel2'), main = "Absolute frequency of Top 20 items", 
+                  xlab = "Item frequency")
+
+# Plot image of distribution of random items
+image(sample(transactions_raw, size = 300)) # of Transactions you'd like to plot))
 ```
 
+```{r Data preparation, include = FALSE}
+#Change data type of df to character 
+for(i in c(1:32)){
+  df_raw[,i] <- as.character(df_raw[,i])
+}
+str(df_raw)
 
-<a name="Data exploration & pre-processing"></a>  
+#Change data type of df itemLevels
+for(i in c(1:ncol(df_names))){
+  df_names[, i] <- as.character(df_names[, i])
+}
+
+#Transfer transaction matrix via logical into binary
+df_trans_log <- as.data.frame(as(transactions_raw, "matrix"))
+df_trans_bin <- df_trans_log
+
+for (i in c(1:ncol(df_trans_bin))){
+  df_trans_bin[, i] <- as.integer(df_trans_bin[, i]) 
+} 
+```
   
-## 1.Data exploration & pre-processing  
-## 1.1.Dealing with repeated products  
+```{r itemLabel (df), eval = FALSE, include = FALSE}
+#Getting il_raw
+il_raw <- itemLabels(transactions_raw)  
+
+#Getting brand level (brand search)
+df_names[, "brand_found"] <- NA
+for (i in c(brand_vector)) {
+  for (j in c(1:125)) {
+    items_found <- agrep(as.character(i), df_names[, which(colnames(df_names) == "il_raw")],  max.distance = 0, 
+                         ignore.case = TRUE, value = FALSE)
+    df_names[c(items_found), which(colnames(df_names) == "brand_found")] <- i
+  }
+}
+
+#Renaming items to new itemnames --> aggregate itemLevels
+df_test <- df_raw
+for (k in c(1:125)) {
+  on <- as.character(df_names[k, which(colnames(df_names) == "il_raw")])
+  nn <- as.character(df_names[k, which(colnames(df_names) == "il_new")])
+  for (i in c(1:32)){
+    for (j in c(1:9835))
+         df_test[j, i] <- replace(df_test[j, i], df_test[j, i] == on, nn)
+  }
+}
+```
+
+```{r Adding itemLevels}
+transactions_raw@itemInfo$il_new <- df_names$il_new
+transactions_raw@itemInfo$brand <- df_names$brand
+transactions_raw@itemInfo$category <- df_names$category
+
+trans_il_new <- arules::aggregate(transactions_raw, by = "il_new")
+df_trans_il_new <- data.frame(as(trans_il_new, "matrix"))
+
+trans_brand <- arules::aggregate(transactions_raw, by = "brand")
+df_trans_brand <- data.frame(as(trans_brand, "matrix"))
+
+trans_category <- arules::aggregate(transactions_raw, by = "category")
+df_trans_cat <- data.frame(as(trans_category, "matrix"))
+
+```
   
 <a name="Comparison"></a>  
   
+  
 ## 2. Comparison of product portfolio  
+  
+```{r Portfolio comparison, echo = FALSE, message = FALSE, warning = FALSE}
+#### Compare Blackwell Electronix and Electronidex ####
+## Prepare portfolio of Blackwell Electronix ##
+#be_portfolio <- rbind(be_ex[, c(1:3, 17:18)],be_new[c(1:4, 7), c(1:3, 17:18)]) #w/ price, margin, and volume
+be_products <- rbind(be_ex[-c(35:41), c(1:2,18)],be_new[c(1:4, 7), c(1:2,18)])
+pred_vol_new <- c(152, 267, 225, 77, 734)
+be_products[c(74:78), 3] <- pred_vol_new
+names(be_products) <- c("category", "ProductNum", "volume")
+be_categories <- as.character(unique(be_products$category))   #not required
+be_portfolio <- setNames(data.frame(matrix(ncol = length(be_categories), nrow = 0)), c(be_categories))
+vol_agg <- data.frame(aggregate(be_products$volume, by = list(be_products$category), FUN = sum))
+              
+for (i in be_categories) {
+  be_portfolio[1, which(colnames(be_portfolio) == i)] <- vol_agg[which(vol_agg$Group.1 == i), 2]
+}
+
+## Prepare portfolio of Electronidex ##
+df_trans_category <- data.frame(as(trans_category, "matrix"))
+ei_portfolio <- setNames(data.frame(matrix(ncol = ncol(df_trans_category), nrow = 0)), c(colnames(df_trans_category)))
+for (i in c(1:ncol(df_trans_category))){
+  ei_portfolio[1,i] <- length(which(df_trans_category[,i] == TRUE))
+}
+
+## Merge visualize portfolios from Blackwell and Electronix
+#Merged via excel using be_portoflio and ei_portfolio
+merged_portfolios <- read.csv(file = here("Data", "portfolio_comparison.csv"), header = TRUE)
+
+ggplot(merged_portfolios, aes(x = category, y = volume)) + 
+          facet_grid(company ~.) + 
+          geom_col(aes(fill = category)) + 
+          scale_color_brewer(palette = "Dark2") +
+          ylim(0, 26000) + 
+          theme(strip.text = element_text(face="bold", size = 12), 
+                strip.background = element_rect(fill = "lightblue", colour = "black", size = 0.8)) + 
+          theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12)) + 
+          theme(axis.text = element_text(size = 12)) + 
+          theme(axis.title = element_text(size = 15)) +
+          xlab("Product Category") + ylab("Volume(Sum)") + 
+          ggtitle("Product portfolio of Blackwell and Electronix") + 
+          theme(title = element_text(size = 15)) + 
+          theme(legend.position = "none")
+```
+'*'Accessories contain 'Computer Cords', 'Computer Stands', 'External Hardrives', 'Keyboard', 'Mouse', 'Mouse and Keyboard'
+'*'Speakers contain 'Computer Headphones', 'Active Headphones'
+
+
   
 <a name="Customer segments"></a>  
   
+  
 ## 3. Analysis on customer segments (B2C, B2B)  
   
+```{r Finding cutting values}
+# Extract 'big products' (PC and Laptop)
+bigprod <- c("Acer Aspire", "Alienware Laptop", "Apple MacBook Air",
+             "Apple MacBook Pro", "ASUS Chromebook", "Dell Laptop",
+             "Eluktronics Pro Gaming Laptop", "HP Laptop", "HP Notebook Touchscreen Laptop",
+             "LG Touchscreen Laptop", "Acer Desktop", "ASUS Desktop", "CYBERPOWER Gamer Desktop",
+             "Dell 2 Desktop", "Dell Desktop", "HP Desktop", "iMac",
+             "Intel Desktop", "Lenovo Desktop Computer")
+colnos_big <- c()
+# Finding transactions for PC and/or laptop
+for (i in bigprod) {
+  colnos_big <- c(colnos_big, which(colnames(df_trans_bin) == i))
+}
+
+colnos_big
+valueprod <- rowSums(df_trans_bin[, c(colnos_big)])
+df_comparison <- df_trans_bin
+df_comparison$valueprods <- valueprod
+
+others <- rowSums(df_trans_bin[, -c(colnos_big)])
+df_comparison$others <- others
+
+
+
+# Extract 'printers'
+printers <- c("Brother Printer", "Canon Office Printer", "DYMO Label Manker",
+              "Epson Printer", "HP Wireless Printer")
+
+colnos_print <- c()
+
+for (i in printers) {
+  colnos_print <- c(colnos_print, which(colnames(df_trans_bin) == i))
+}
+
+colnos_print
+Printers <- rowSums(df_trans_bin[, c(colnos_print)])
+df_comparison$Printers <- Printers
+
+# Extract 'Monitors'
+monitors <- c("Acer Monitor", "AOC Monitor", "ASUS 2 Monitor",
+              "ASUS Monitor", "Dell Monitor", "HP Monitor",
+              "LG Monitor", "Samsung Monitor", "Sceptre Monitor",
+              "ViewSonic Monitor"
+              )
+
+colnons_monit <- c()
+
+for (i in monitors) {
+ colnons_monit <- c(colnons_monit, which(colnames(df_trans_bin) == i))
+}
+
+colnons_monit
+monitors <- rowSums(df_trans_bin[, c(colnons_monit)])
+df_comparison$monitors <- monitors
+
+
+Trsize <- c()
+
+for (i in 1:nrow(df_trans_bin)) {
+ Trsize <- c(Trsize, sum(df_comparison[i,-c(126:128)]))
+}
+
+df_comparison$tsize <- Trsize
+
+# found zero rows, zero items bought is not really a transaction
+
+df_comparison <- df_comparison[-c(which(df_comparison$tsize == 0)),]
+
+# Creaing df for cluster analysis
+clusterdata_big <- c(df_comparison$valueprods, df_comparison$tsize)
+clusterdata_others <- c(df_comparison$others, df_comparison$tsize)
+clusterdata_bigothers <- c(df_comparison$valueprods, df_comparison$others)
+clusterdata_print <- c(df_comparison$Printers, df_comparison$tsize)
+clusterdata_monit <- c(df_comparison$monitors, df_comparison$tsize)
+
+# Clustering analysis
+trans_kmeans_big <- kmeans(clusterdata_big, 3)
+trans_kmeans_others <- kmeans(clusterdata_others, 3)
+trans_kmeans_bigothers <- kmeans(clusterdata_bigothers, 3)
+trans_kmeans_print <- kmeans(clusterdata_print, 2)
+trans_kmeans_monit <- kmeans(clusterdata_monit, 2)
+
+# Visualization 
+plot(df_comparison$Printers)
+plot(df_comparison$monitors)
+
+plot(x = df_comparison$valueprods, y = df_comparison$tsize, pch = trans_kmeans_big$cluster) +
+points(trans_kmeans_big$centers, pch = 8, cex =3)
+
+plot(x = df_comparison$others, y = df_comparison$tsize, pch = trans_kmeans_others$cluster) + points(trans_kmeans_others$centers, pch = 8, cex =3)
+
+plot(x = df_comparison$valueprods, y = df_comparison$others, pch = trans_kmeans_bigothers$cluster) + points(trans_kmeans_bigothers$centers, pch = 8, cex =3)
+
+plot(x = df_comparison$Printers, y = df_comparison$tsize, pch = trans_kmeans_print$cluster) + points(trans_kmeans_bigothers$centers, pch = 8, cex =3)
+
+plot(x = df_comparison$monitors, y = df_comparison$tsize, pch = trans_kmeans_monit$cluster) + points(trans_kmeans_monit$centers, pch = 8, cex =3)
+
+
+bigdeals <- which(df_comparison$tsize >= 10)
+
+View(bigdeals)
+
+Bigdeals.df <- df_comparison[c(bigdeals),]
+
+View(Bigdeals.df)
+
+ggplot(data = Bigdeals.df, aes(x = Printers, y= tsize)) + geom_point()
+
+ggplot(data = Bigdeals.df, aes(x = monitors, y= tsize)) + geom_point()
+
+```
+
+```{r Data split in B2C and B2B}
+twocpus <- which(df_comparison$valueprods >= 2)
+twoprints <- which(df_comparison$Printers >= 2)
+twomons <- which(df_comparison$monitors >= 2)
+tensize <- which(df_comparison$tsize >= 10)                                                         
+
+b2b.sales <- df_comparison[c(twocpus, twomons, twoprints, tensize), ]
+
+View(b2b.sales)
+
+```
+
+```{r }
+
+```
+
+    
 <a name="Association rules"></a>  
   
-## 4. Association rules mining (B2C, B2B)  
+  
+## 4. Association rules mining 
+  
+```{r Looking for rules}
+##Out of the box
+#rules cover 10% of the transactions(supp = .1) and are 80% correct (conf = .8)
+rules <- apriori(trans_category, parameter = list(supp = 0.01, conf = 0.95, minlen = 2, maxlen = 10)) #first rules using supp = 0.001 and
+#0.0009 0.95 --> 98 rules
+
+##Check, exclude, sort, and select rules
+#Check for redundant rules and contain them
+func_redundant <- function (trans_data){
+  sum(is.redundant(trans_data))
+  rules_red <- trans_data[which(is.redundant(trans_data))]
+  n_rules_red <- c(which(is.redundant(trans_data)))
+  inspect(rules_red)
+  
+  #Exclude redundant rules
+  rules_unique <<- trans_data[-c(n_rules_red)]
+}
+func_redundant(rules) 
+inspect(head(rules_unique))
+
+inspect(head(rules_sorted, 10))
+func_sort(rules_unique)
+inspect(rules_sorted)
+
+summary(rules_sorted)
+
+plot(rules_sorted)
+inspectDT(rules_sorted)             #interactive inspect
+plotly_arules(rules_sorted[1:5],  #for interactive plots
+              engine = "htmlwidget")   #interactive plot 
+plot(rules_sorted[1:5], method = "two-key plot", control = list(type = "items", reorder = TRUE))
+plot(rules_sorted[1:10], method = "paracoord", control = list(type = "items", reorder = TRUE))
+
+#Meaning of values:
+#-values too high --> no rules or non-helpful rules
+#-values too low --> computational time/memory will suffer, or too many rules. 
+#-to find strong rules, increase the value of âconfâ parameter
+#-minlen = 1 --> rules with one item, means: no matter what other items are involved, 
+#the item in the RHS will appear with the probability given by the rule's confidence (= support)
+#To avoid these rules increase minlen (to 2)
+inspect(rules[1:25])
+summary(rules) 
+str(rules)
+
+
+#lift measures importance of a rule --> high = important rule
+#Unlike confidence, {I1} -> {I2} is the same as {I2} -> {I1} in the context of the lift measurement
+
+#Specific rules per item
+ItemRules <- subset(rules_unique, items %in% "iMac")
+inspect(ItemRules)
+
+#Sort rules in terms of support, confidence, lift
+
+func_sort <- function (trans_data){
+  inspect(sort(trans_data, by = "count", decreasing = FALSE))
+  rules_sorted <<- sort(trans_data, by = "lift")
+  inspect(rules_sorted)
+}
+func_sort(rules_unique)
+
+
+```
   
 <a name="Selection of rules"></a>  
   
-## 5. Selection of rules (B2C, B2B) 
+  
+## 5. Selection of rules
+  
+```{r}
 
-
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
