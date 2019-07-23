@@ -1,0 +1,133 @@
+---
+title: "**Market basket analysis - documentation**"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#### Load libraries & Setup ####
+install.packages("pacman")
+library(pacman)
+p_load(caret, lattice, readr, Metrics, corrplot, e1071, mlr, recipes, ggplot2, 
+       C50, party, reshape, dplyr,markdown, ggpubr, tidyr, hydroGOF, BBmisc, 
+       tidyverse, textclean, inum, doParallel, Hmisc, caretEnsemble, mboost, 
+       cluster, ade4, factoextra, asbio, FactoMineR, fpc,e1071, 
+       randomForest, rstudioapi, MASS, ParamHelpers, mlr,
+       arules,      # analyzing transactional data
+       arulesViz,    # provides visual techniques for the arules package.
+       RColorBrewer,
+       plyr
+       )
+
+# Enable parallel computing
+cl <- makePSOCKcluster(4)
+registerDoParallel(cl)
+
+# Disable scientific notation
+options(scipen = 999)
+```
+
+# Executive summary  
+
+**Case**  
+  
+  
+**Procedure**  
+xyz  
+  
+**Results**  
+xyz  
+  
+**Limitations**  
+  
+**Recommendations**  
+  
+  
+# Technical documentation  
+  
+**Table of contents**  
+0. [Loading data](#Loading data) 
+1. [Data exploration & pre-processing](#Data exploration & pre-processing) 
+    1.1 [Placeholder](#Placeholder)    
+2. [Comparison of product portfolio](#Comparison)  
+3. [Analysis on customer segments (B2C, B2B)](#Customer segments)  
+4. [Association rules mining](#Association rules)  
+5. [Selection of rules](#Selection of rules)  
+
+<a name="Loading data"></a>  
+  
+## 0. Loading data  
+  
+```{r Loading data, message = FALSE, warning = FALSE, include = FALSE}
+#### Loading data ####
+current_path = getActiveDocumentContext()$path
+setwd(dirname(current_path))
+getwd()
+setwd("..")
+setwd("Data")
+
+## Electronidex ##
+#Load transaction into class transaction (sparse matrix)
+transactions_raw <- read.transactions(file = "ElectronidexTransactions2017.csv", 
+                                      header = FALSE, format = "basket", sep = ",", rm.duplicates = TRUE)# rm.duplicates = FALSE)
+#Load transaction into class df
+df_raw <- read.csv("ElectronidexTransactions2017.csv", header = FALSE)
+
+#Load itemlevels (new name, brand, category) into class df
+df_names <- read.csv("List_itemNames.csv")
+
+brand <- read.csv("il_brand.csv")
+brand_vector <- as.character(brand$brand)
+
+#Safe itemNames
+write.table(itemLabels(transactions_raw), file = "List_itemNames.csv", sep = ",")
+
+## Blackwell Electronics ##
+be_ex <- read.csv("blackwell_existing.csv", header = TRUE)
+be_new <- read.csv("blackwell_new.csv", header = TRUE)
+```
+
+
+<a name="Data exploration & pre-processing"></a>  
+  
+## 1.Data exploration & pre-processing  
+## 1.1.Dealing with repeated products  
+  
+<a name="Comparison"></a>  
+  
+## 2. Comparison of product portfolio  
+  
+<a name="Customer segments"></a>  
+  
+## 3. Analysis on customer segments (B2C, B2B)  
+  
+<a name="Association rules"></a>  
+  
+## 4. Association rules mining (B2C, B2B)  
+  
+<a name="Selection of rules"></a>  
+  
+## 5. Selection of rules (B2C, B2B) 
+
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

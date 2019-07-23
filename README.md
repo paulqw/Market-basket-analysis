@@ -1,8 +1,8 @@
----
-title: "**Market basket analysis**"
-author: "Elias and Paul"
-date: "23/07/2019"
----
+# **Market basket analysis**  
+  
+Team: Elias and Paul  
+Date: 23/07/2019  
+  
 ## Project summary
 **Business case:** The fictitious client Blackwell Electronics (BE) is a mature electronics retailer recently entering the ecommerce market. To strengthen its market position, BE is considering to acquire Electronidex, a start-up specialised in electronics ecommerce. For the acquisition decision a deep analysis of customer buying patterns is required to evaluate the strategic fit of both companies.  
   
