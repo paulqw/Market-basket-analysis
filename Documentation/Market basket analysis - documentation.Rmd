@@ -154,16 +154,21 @@ for (k in c(1:125)) {
 ```
 
 ```{r Adding itemLevels}
-transactions_raw@itemInfo$il_new <- df_names$il_new
-transactions_raw@itemInfo$brand <- df_names$brand
-transactions_raw@itemInfo$category <- df_names$category
-
+## il_new (brand and category)
+transactions_raw@itemInfo$il_new <- df_names$il_new     #already ordered
 trans_il_new <- arules::aggregate(transactions_raw, by = "il_new")
 df_trans_il_new <- data.frame(as(trans_il_new, "matrix"))
 
-trans_brand <- arules::aggregate(transactions_raw, by = "brand")
+## brand
+df_brand_ordered <- df_names[c(order(df_names$brand)), ] 
+# labels of itemLevels needs to be in lexicographical order for apriori as it picks by lexicographical order
+transactions_raw@itemInfo$brand <- df_brand_ordered$brand
+view(trans_brand) <- arules::aggregate(transactions_raw, by = "brand")
 df_trans_brand <- data.frame(as(trans_brand, "matrix"))
 
+## category
+df_cat_ordered <- df_names[c(order(df_names$category)), ]
+transactions_raw@itemInfo$category <- df_cat_ordered$category
 trans_category <- arules::aggregate(transactions_raw, by = "category")
 df_trans_cat <- data.frame(as(trans_category, "matrix"))
 
@@ -363,66 +368,100 @@ View(b2b.sales)
 ```{r Looking for rules}
 ##Out of the box
 #rules cover 10% of the transactions(supp = .1) and are 80% correct (conf = .8)
-rules <- apriori(trans_category, parameter = list(supp = 0.01, conf = 0.95, minlen = 2, maxlen = 10)) #first rules using supp = 0.001 and
+rules <- apriori(trans_category, parameter = list(supp = 0.015, conf = 0.75, minlen = 2, maxlen = 10)) #first rules using supp = 0.001 and
 #0.0009 0.95 --> 98 rules
+inspect(rules)
 
-##Check, exclude, sort, and select rules
-#Check for redundant rules and contain them
+
+#### Functions for redundant and sort ####
+# Check, exclude, sort, and select rules
 func_redundant <- function (trans_data){
   sum(is.redundant(trans_data))
   rules_red <- trans_data[which(is.redundant(trans_data))]
   n_rules_red <- c(which(is.redundant(trans_data)))
-  inspect(rules_red)
+  #inspect(rules_red)
   
-  #Exclude redundant rules
+  # Exclude redundant rules
   rules_unique <<- trans_data[-c(n_rules_red)]
-}
-func_redundant(rules) 
-inspect(head(rules_unique))
+} # Inuts: trans_data = file with rules
+# Sort rules in terms of support, confidence, lift
+func_sort <- function (trans_data, by){
+  rules_sorted <<- sort(trans_data, by = by, decreasing = TRUE)
+  #inspect(rules_sorted)
+}  # Inuts: trans_data = file with rules; by = "metric" (e.g.: "support", "confidence", "count")
 
+#### Analysis ####
+# Check for redundant rules and exlude them
+func_redundant(rules)
+
+# Sort rules in terms of support, confidence, lift
+func_sort(rules_unique, "lift")
+
+# Check 
 inspect(head(rules_sorted, 10))
-func_sort(rules_unique)
-inspect(rules_sorted)
-
 summary(rules_sorted)
+str(rules)
 
-plot(rules_sorted)
-inspectDT(rules_sorted)             #interactive inspect
-plotly_arules(rules_sorted[1:5],  #for interactive plots
-              engine = "htmlwidget")   #interactive plot 
-plot(rules_sorted[1:5], method = "two-key plot", control = list(type = "items", reorder = TRUE))
-plot(rules_sorted[1:10], method = "paracoord", control = list(type = "items", reorder = TRUE))
-
-#Meaning of values:
+## Meaning of values:
 #-values too high --> no rules or non-helpful rules
 #-values too low --> computational time/memory will suffer, or too many rules. 
-#-to find strong rules, increase the value of âconfâ parameter
+#-to find strong rules, increase the value of confidence parameter
 #-minlen = 1 --> rules with one item, means: no matter what other items are involved, 
 #the item in the RHS will appear with the probability given by the rule's confidence (= support)
 #To avoid these rules increase minlen (to 2)
-inspect(rules[1:25])
-summary(rules) 
-str(rules)
 
+#-lift measures importance of a rule --> high = important rule
+#-Unlike confidence, {I1} -> {I2} is the same as {I2} -> {I1} in the context of the lift measurement
 
-#lift measures importance of a rule --> high = important rule
-#Unlike confidence, {I1} -> {I2} is the same as {I2} -> {I1} in the context of the lift measurement
-
-#Specific rules per item
+## Select specific rules per item
 ItemRules <- subset(rules_unique, items %in% "iMac")
 inspect(ItemRules)
-
-#Sort rules in terms of support, confidence, lift
-
-func_sort <- function (trans_data){
-  inspect(sort(trans_data, by = "count", decreasing = FALSE))
-  rules_sorted <<- sort(trans_data, by = "lift")
-  inspect(rules_sorted)
-}
-func_sort(rules_unique)
-
-
 ```
+
+```{r Visualization}
+plot(rules_sorted)
+inspectDT(rules_sorted)                #interactive inspect
+plotly_arules(rules_sorted[1:5],       #for interactive plots
+              engine = "htmlwidget")   #interactive plot 
+plot(rules_sorted[1:5], method = "two-key plot", control = list(type = "items", reorder = TRUE))
+plot(rules_sorted[1:10], method = "paracoord", control = list(type = "items", reorder = TRUE))
+plot(rules_sorted[1:5], method = "graph", control = list(type = "items", reorder = TRUE))
+```
+
+```{r}
+rules <- apriori(transactions_raw, parameter = list(supp = 0.0015, conf = 0.75, minlen = 1, maxlen = 10))
+func_redundant(rules)
+func_sort(rules, "lift")
+inspect(head(rules_sorted, 10))
+summary(rules_sorted)
+
+plot(rules_sorted)
+inspectDT(rules_sorted)                #interactive inspect
+plotly_arules(rules_sorted[1:5],       #for interactive plots
+              engine = "htmlwidget")   #interactive plot 
+plot(rules_sorted[1:5], method = "two-key plot", control = list(type = "items", reorder = TRUE))
+plot(rules_sorted[1:10], method = "paracoord", control = list(type = "items", reorder = TRUE))
+plot(rules_sorted[1:5], method = "graph", control = list(type = "items", reorder = TRUE))
+```
+
+
+```{r}
+rules <- apriori(trans_brand, parameter = list(supp = 0.015, conf = 0.75, minlen = 2, maxlen = 10))
+func_redundant(rules)
+func_sort(rules, "lift")
+inspect(head(rules_sorted, 10))
+summary(rules_sorted)
+
+plot(rules_sorted)
+inspectDT(rules_sorted)                #interactive inspect
+plotly_arules(rules_sorted[1:5],       #for interactive plots
+              engine = "htmlwidget")   #interactive plot 
+plot(rules_sorted[1:5], method = "two-key plot", control = list(type = "items", reorder = TRUE))
+plot(rules_sorted[1:10], method = "paracoord", control = list(type = "items", reorder = TRUE))
+plot(rules_sorted[1:5], method = "graph", control = list(type = "items", reorder = TRUE))
+```
+
+
   
 <a name="Selection of rules"></a>  
   

@@ -203,10 +203,20 @@ ggarrange(gg_vol, gg_port, ncol = 1, nrow = 2)
 #2. 2nd step: analyzes all of the itemsets to determine which meet the confidence measurement requirement. 
 #The itemsets/rules that do not meet this requirement are removed.
 
+#Support: 
+#-gives an idea of how frequent an itemset is in all the transactions 
+#-Value of support helps us identify the rules worth considering for further analysis
+#--> wich portion of transaction can be predicted by the rule
+
+#Confidence:
+#-defines the likeliness of occurrence of consequent on the cart given that the cart already has the antecedents
+#--> how like it is that b is purchased if A is purchased as well
+
 ##Out of the box
 #rules cover 10% of the transactions(supp = .1) and are 80% correct (conf = .8)
 rules <- apriori(transactions_raw, parameter = list(supp = 0.0007, conf = 0.90, minlen = 2, maxlen = 10)) #first rules using supp = 0.001 and
 #0.0009 0.95 --> 98 rules
+inspect(rules)
 
 func_redundant(rules) 
 inspect(rules_unique)
