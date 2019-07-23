@@ -14,16 +14,16 @@ x,il_raw,category,brand,il_new
 13,Apple Earpods,Active Headphones,Apple,Apple Headphones
 14,Apple MacBook Air,Laptop,Apple,Apple Laptop
 15,Apple MacBook Pro,Laptop,Apple,Apple Laptop
-16,Apple Magic Keyboard, Keyboard,Apple,Apple Mikey
+16,Apple Magic Keyboard,Keyboard,Apple,Apple Mikey
 17,Apple TV,Smart Home Devices,Apple,Apple Home
-18,Apple Wired Keyboard, Keyboard,Apple,Apple Mikey
-19,Apple Wireless Keyboard, Keyboard,Apple,Apple Mikey
+18,Apple Wired Keyboard,Keyboard,Apple,Apple Mikey
+19,Apple Wireless Keyboard,Keyboard,Apple,Apple Mikey
 20,ASUS 2 Monitor,Monitor,Asus,ASUS Monitor
 21,ASUS Chromebook,Laptop,Asus,Asus Laptop
 22,ASUS Desktop,Desktop,Asus,ASUS Desktop
 23,ASUS Monitor,Monitor,Asus,ASUS Monitor
 24,Audio Cable,Computer Cords,Unknown,Audio Cords
-25,Backlit LED Gaming Keyboard, Keyboard,Unknown,Gaming Mikey
+25,Backlit LED Gaming Keyboard,Keyboard,Unknown,Gaming Mikey
 26,Belkin Mouse Pad,Accessories,Belkin,Mpad Accessories
 27,Bose Companion Speakers,Speakers,Bose,Bose Speakers
 28,Brother Printer,Printers,Brother,Brother Printer
@@ -39,7 +39,7 @@ x,il_raw,category,brand,il_new
 38,Dell KM117 Wireless Keyboard & Mouse,Mouse and Keyboard,Dell,Dell MiKey
 39,Dell Laptop,Laptop,Dell,Dell Laptop
 40,Dell Monitor,Monitor,Dell,Dell Monitor
-41,Dell Wired Keyboard, Keyboard,Dell,Dell MiKey
+41,Dell Wired Keyboard,Keyboard,Dell,Dell MiKey
 42,DOSS Touch Wireless Bluetooth,Speakers,DOSS,DOSS Speakers
 43,DYMO Label Manker,Printers,DYMO,DYMO Printer 
 44,DYMO Labeling Tape,Printer Ink,DYMO,DYMO Ink
@@ -65,7 +65,7 @@ x,il_raw,category,brand,il_new
 64,HP Laptop,Desktop,HP,HP Desktop
 65,HP Monitor,Monitor,HP,HP Monitor
 66,HP Notebook Touchscreen Laptop PC,Laptop,HP,HP Laptop
-67,HP USB Keyboard, Keyboard,HP,HP Mikey
+67,HP USB Keyboard,Keyboard,HP,HP Mikey
 68,HP Wireless Mouse,Mouse,HP,HP Mikey
 69,HP Wireless Printer,Printers,HP,HP Printer
 70,iMac,Desktop,Apple,iMac
@@ -84,13 +84,13 @@ x,il_raw,category,brand,il_new
 83,Logitech 3-button Mouse,Mouse,Logitech,Logitech MiKey
 84,Logitech ClearChat Headset,Computer Headphones,Logitech,Logitech Headset
 85,Logitech Desktop MK120 Mouse and keyboard Combo,Mouse and Keyboard,Logitech,Logitech MiKey
-86,Logitech Keyboard, Keyboard,Logitech,Logitech MiKey
+86,Logitech Keyboard,Keyboard,Logitech,Logitech MiKey
 87,Logitech MK270 Wireless Keyboard and Mouse Combo,Mouse and Keyboard,Logitech,Logitech MiKey
 88,Logitech MK360 Wireless Keyboard and Mouse Combo,Mouse and Keyboard,Logitech,Logitech MiKey
 89,Logitech MK550 Wireless Wave Keyboard and Mouse Combo,Mouse and Keyboard,Logitech,Logitech MiKey
 90,Logitech Multimedia Speakers,Speakers,Logitech,Logitech Speakers
 91,Logitech Stereo Headset,Computer Headphones,Logitech,Logitech Headset 
-92,Logitech Wireless Keyboard, Keyboard,Logitech,Logitech MiKey
+92,Logitech Wireless Keyboard,Keyboard,Logitech,Logitech MiKey
 93,Logitech Wireless Mouse,Mouse,Logitech,Logitech MiKey
 94,Mackie CR Speakers,Speakers,Mackie,Mackie Speakers
 95,Microsoft Basic Optical Mouse,Mouse,Microsoft,Microsoft Mikey
@@ -107,7 +107,7 @@ x,il_raw,category,brand,il_new
 106,Philips Flexible Earhook Headphone,Active Headphones,Philips,Philips Headphones
 107,Redragon Gaming Mouse,Mouse,Redragon,Redragon Mikey
 108,Rii LED Gaming Keyboard & Mouse Combo,Mouse and Keyboard,Rii,Rii Mikey
-109,Rii LED Keyboard, Keyboard,Rii,NN MiKey
+109,Rii LED Keyboard,Keyboard,Rii,NN MiKey
 110,Rokono Mini Speaker,Speakers,Rokono,Rokono Mini Speaker
 111,Roku Express,Smart Home Devices,Unknown,NN Home
 112,Samsung Charging Cable,Computer Cords,Samsung,Samsung Cords
