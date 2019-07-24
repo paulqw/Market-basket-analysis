@@ -1,16 +1,21 @@
 ---
 title: "**Market basket analysis - documentation**"
+subtitle: "Team: Elias and Paul"
+date: "`r Sys.Date()`"
 output: html_document
 ---
 
-```{r setup, include = FALSE}
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-
+```
+  
+```{r message=FALSE, warning=FALSE, include=FALSE}
 #### Load libraries & Setup ####
 #install.packages("pacman")
+#install.packages("rmdformats")
 library(pacman)
 p_load(caret, lattice, readr, Metrics, corrplot, e1071, mlr, recipes, ggplot2, 
-       C50, party, reshape, dplyr,markdown, ggpubr, tidyr, hydroGOF, BBmisc, 
+       C50, party, reshape, dplyr, markdown, ggpubr, tidyr, hydroGOF, BBmisc, 
        tidyverse, textclean, inum, doParallel, Hmisc, caretEnsemble, mboost, 
        clsuter, ade4, factoextra, asbio, FactoMineR, fpc,e1071, 
        randomForest, rstudioapi, MASS, ParamHelpers, mlr,
@@ -19,7 +24,10 @@ p_load(caret, lattice, readr, Metrics, corrplot, e1071, mlr, recipes, ggplot2,
        RColorBrewer,
        plyr,
        here,         #relative path
-       shiny         #dashboard for R
+       shiny,         #dashboard for R
+       tinytex,
+       rmdformats,
+       knitr
        )
 
 # Enable parallel computing
@@ -35,27 +43,78 @@ attach(RPROJ)
 rm(RPROJ)
 ```
 
-# Executive summary  
 
-**Case**  
+# Executive summary  
   
   
-**Procedure**  
-xyz  
+**1. Scope and background**  
+
+Blackwell are exploring the possibility of acquiring Electronidex (the “Target”), an online electronics retailer. The Target has been presented to us as an enterprise in the start-up stage. We do not have any information of in which stage of the start-up cycle (e.g. pre-seed, seed, seed plus, series A) the Target is currently. 
+
+For the purposes of evaluating the feasibility of the transaction, we have been requested to analyse the Targets sales based on a dataset containing transactional data about the Targets sales during a period of 30 days. Blackwell has specifically requested that we conduct a data-mining operation with the purpose of extracting associations between the different products sold in the transactions in the dataset. We do not know which month nor have we been furnished such other information that would allow us to assess, weight or adjust our conclusions for effects of possible seasonality.
+
+Furthermore, the underlying rationale for the envisioned transaction has not been disclosed to us. We are assuming that the transaction is intended as a strategic rather than a financial transaction, but we have not been made aware what the sought-after addition to the strategic capability of Blackwell is. Without knowing whether Blackwell is interested in, for instance, the Targets IP, inorganic growth of market-share, absolute volume or possible operational synergies (e.g. marketing synergy, infrastructure synergy, distribution synergy, financial advantages), we lack an adequate backdrop against which we could assess the strategic fit.
+
+We have, however, conducted our review around the hypothesis that Blackwell is seeking to increase its online presence by acquiring the Target as a going concern. We have not been made aware of whether Blackwell intends to merge the Target or its operations into Blackwell or to keep operating the Target as a stand-alone entity post-closing. 
+
+We are not aware of the envisioned deal structure (share or business purchase, size of stake, leveraged or unleveraged etc.), mode of payment (cash, shares, mix etc), financials of the Target, financials of Blackwell, valuation of the Target or a possible integration plan. 
+
+Owing to the lack of essential information, we presume that this review is intended as a part of the limited business review conducted as part of the initial screening in the acquisition process.
+
+The goal of the initial screening is to assess the overall feasibility of the acquisition without incurring heavy costs. We have decided to focus on the part of the so-called 5M (Management, Market, Market-share, Margins, Model) that the dataset and other provided information allows us to address in a meaningful way. We lack information that would allow us to adequately assess the capabilities of the current management, the prevailing market conditions in the Target’s focus market or the Target’s share of any given market.  
+
+Consequently, our analysis has focused on trying to gain some form of superficial understanding of whether there are significant overlaps or synergies between selections and cross-selling opportunities. The insights regarding said three subjects can allow us to formulate hypotheses about some aspects of the Target’s business model and margins that will need to be reviewed and verified in the due diligence stages of the transaction, should Blackwell decide to progress the transaction beyond the initial screening phase. 
+
+We stress that we are not familiar with the business-model related items, such as which terms that the Target applies in its supply chain, we do not know if it operates on the basis of consignment or if they carry the risk for the inventory, we do not know if the shipping costs are borne by the customer or the Target, if the Target owns or leases its warehouses. We are furthermore not aware if the Target is an agency, distributor or dealer of the brands that it is purveying. 
   
-**Results**  
-xyz  
   
-**Limitations**  
+**2. Associations**
+
+We have in our review prioritised such associations that appear frequently (in relative terms) in the dataset. In technical terms, we have used support as the prevailing criterium at the expense of both lift and confidence.
+
+The rationale for this course of action is the following:
+
+  i)	The more frequent an itemset is, the more people we can reach with cross-selling efforts;
+ ii)	The cost of a recommendation (for instance) is low, so one can make as many recommendations as deemed appropriate, which decreases the importance of the relative “hit rate” of an individual recommendation;
+iii)	For the purposes of an acquisition, we deemed it more relevant to know which association rules concerned the largest volume of transactions, rather than what the strongest hit rates were because this review was based only on a month worth of data, and a larger volume typically implies a better representativeness of a sample. 
+
+For the purposes of our evaluation, we split out review into five different reviews. The details of each review are presented in the appended technical report. We shall only present the conclusions herein.  
+
+1. Review of associations within B2B sales:
+- No particularly strong rules
+-	The trend was that Dell and Apple products were often sold together
+-	This can be a result of the fact that the companies formally buy the products but the end-users are the ones deciding what to buy, and because preferences vary from one individual to another, we are going to see a mix of brands in the basket in B2B sales.  
   
-**Recommendations**  
+2. Review of associations within B2C sales:
+-	No strong rules
+-	Here we could spot brand preference: Apple products were often purchased together with other Apple products  
+  
+3. Review of associations between brands:
+-	Dell and Apple were often purchased together as explained in the B2B section  
+  
+4. Review of associations between product categories:
+-	Headphones were often purchased together with laptops  
+  
+5. Review of associations between individual products:
+-	No strong rules
+-	Dell products were often purchased together with Apple products  
+  
+    
+**3.	Feasibility of acquisition**
+
+As indicated earlier, we lack essential information needed to appropriately assess the merit of the transaction. 
+
+Based on the limited review, it would seem as though the Target has established a B2B clientele that Blackwell lacks. Acquiring the Target could be a way to gain that presence.
+
+It would also seem that the Target shows strong sales figures relative to those of Blackwell in regard of laptops and desktops. We suspect that this is an effect of the B2B sales, but cannot verify this.
+
+Our recommendation is to progress to the following stage of the acquisition process, namely the Phase I due diligence after which we should be better equipped to determine the strategic fit of the Target.
   
   
 # Technical documentation  
   
 **Table of contents**  
 1. [Exploration and preparation of data ](#Exploration and preparation of data )  
-    1.1 [Placeholder](#Placeholder)  
 2. [Comparison of product portfolio](#Comparison)  
 3. [Analysis on customer segments (B2C, B2B)](#Customer segments)  
 4. [Association rules mining](#Association rules)  
@@ -91,21 +150,32 @@ be_new <- read.csv(file = here("Data", "blackwell_new.csv"), header = TRUE)
   
 ## 1. Exploration and preparation of data  
   
-```{r Data exploration, echo = FALSE, message = FALSE, warning = FALSE}
+```{r Data exploration, message=FALSE, warning=FALSE, include=FALSE}
 ## 1. Exploring - Get to know the data ## 
-transactions_raw
-summary(transactions_raw) 
-sum(size(transactions_raw))/length (transactions_raw)  #Avg. transaction size
+paste(length(transactions_raw))
+paste(sum(size(transactions_raw))/length (transactions_raw))  #Avg. transaction size
+```
 
+The transaction set contains *`r paste(length(transactions_raw))`* transactions.
+The average transaction size contains *`r paste(sum(size(transactions_raw))/length (transactions_raw))`* items. 
+
+Plotting the frequency of products purchased in all transactions one can see from the figure below that iMac is the top-selling product for Electronidex followed by HP Laptop and CYBERPOWER Gamer Desktop. Amongst top 5 there are additionally two other Apple products, namly Earpods and MacBook Air.  
+  
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 ##Visualization 
 # Create an item frequency plot
 itemFrequencyPlot(transactions_raw, topN = 20, type = "absolute", horiz = TRUE, 
                   col = brewer.pal(8,'Pastel2'), main = "Absolute frequency of Top 20 items", 
                   xlab = "Item frequency")
+```
 
+The following graph visualizes a random sample of the underlying transaction data. Using this depiction, there are apparently no patterns to be observed.  
+
+```{r Image, echo=FALSE, message=FALSE, warning=FALSE}
 # Plot image of distribution of random items
 image(sample(transactions_raw, size = 300)) # of Transactions you'd like to plot))
 ```
+
 
 ```{r Data preparation, include = FALSE}
 #Change data type of df to character 
@@ -154,7 +224,7 @@ for (k in c(1:125)) {
 }
 ```
 
-```{r Adding itemLevels}
+```{r Adding itemLevels, include = FALSE}
 # labels of itemLevels needs to be in lexicographical order for apriori as it picks by lexicographical order
 ## brand
 df_brand_ordered <- df_names[c(order(df_names$brand)), ] 
@@ -175,6 +245,8 @@ df_trans_category <- data.frame(as(trans_category, "matrix"))
   
 ## 2. Comparison of product portfolio  
   
+To compare the product portfolios of both companies the selling record is plotted against main product categories. One can clearly state that Blackwell sells a huge amount of Accessories whereas all other categories besides GameConsole and Software are quite low. In comparison to that Electronidex holds a huge stack in PC and Laptops. These are especially considered as strategic selling categories as they over high cross-selling potential for peripherical product categories, primarily Accessories and Speakers. Based on this view on product portfolio synergies could be found with the acquisition as both portoflios supplement each other in several categories.
+
 ```{r Portfolio comparison, echo = FALSE, message = FALSE, warning = FALSE}
 #### Compare Blackwell Electronix and Electronidex ####
 ## Prepare portfolio of Blackwell Electronix ##
@@ -216,17 +288,17 @@ ggplot(merged_portfolios, aes(x = category, y = volume)) +
           theme(title = element_text(size = 15)) + 
           theme(legend.position = "none")
 ```
-'*'Accessories contain 'Computer Cords', 'Computer Stands', 'External Hardrives', 'Keyboard', 'Mouse', 'Mouse and Keyboard'
-'*'Speakers contain 'Computer Headphones', 'Active Headphones'
-
-
+  
+* Accessories contain 'Computer Cords', 'Computer Stands', 'External Hardrives', 'Keyboard', 'Mouse', 'Mouse and Keyboard'  
+* Speakers contain 'Computer Headphones', 'Active Headphones'  
+  
   
 <a name="Customer segments"></a>  
   
   
 ## 3. Analysis on customer segments (B2C, B2B)  
   
-```{r Finding cutting values}
+```{r Finding cutting values, message=FALSE, warning=FALSE, include=FALSE}
 # Extract 'big products' (PC and Laptop)
 bigprod <- c("Acer Aspire", "Alienware Laptop", "Apple MacBook Air",
              "Apple MacBook Pro", "ASUS Chromebook", "Dell Laptop",
@@ -308,32 +380,28 @@ trans_kmeans_bigothers <- kmeans(clusterdata_bigothers, 3)
 trans_kmeans_print <- kmeans(clusterdata_print, 2)
 trans_kmeans_monit <- kmeans(clusterdata_monit, 2)
 
-# Visualization 
-plot(df_comparison$Printers)
-plot(df_comparison$monitors)
+bigdeals <- which(df_comparison$tsize >= 10)
 
+Bigdeals.df <- df_comparison[c(bigdeals),]
+```
+  
+  
+To revail patterns for different customer segments, i.e. B2C and B2B, the transaction dataset has been splitted. This seemed to be meaningful in terms of getting insights on customer buying patterns in relation to certain valueable products (i.e. PC and Laptop), transaction size. Besides this the cluster takes Printer and Monitor into account as they are frequently used in business environments and thus considered to be a good indicator. As the data gives no information on customer segment the split has been done using predefined cut values. These cut values are found in a previous cluster analysis applying kmeans cluster algorithm.  
+
+
+```{r Visualization of cluster analysis, echo=FALSE, message=FALSE, warning=FALSE, results = 'hide'}
+# Visualization 
 plot(x = df_comparison$valueprods, y = df_comparison$tsize, pch = trans_kmeans_big$cluster) +
 points(trans_kmeans_big$centers, pch = 8, cex =3)
 
 plot(x = df_comparison$others, y = df_comparison$tsize, pch = trans_kmeans_others$cluster) + points(trans_kmeans_others$centers, pch = 8, cex =3)
 
-plot(x = df_comparison$valueprods, y = df_comparison$others, pch = trans_kmeans_bigothers$cluster) + points(trans_kmeans_bigothers$centers, pch = 8, cex =3)
-
-plot(x = df_comparison$Printers, y = df_comparison$tsize, pch = trans_kmeans_print$cluster) + points(trans_kmeans_bigothers$centers, pch = 8, cex =3)
-
 plot(x = df_comparison$monitors, y = df_comparison$tsize, pch = trans_kmeans_monit$cluster) + points(trans_kmeans_monit$centers, pch = 8, cex =3)
 
-
-bigdeals <- which(df_comparison$tsize >= 10)
-
-Bigdeals.df <- df_comparison[c(bigdeals),]
-
-ggplot(data = Bigdeals.df, aes(x = Printers, y= tsize)) + geom_point()
 ggplot(data = Bigdeals.df, aes(x = monitors, y= tsize)) + geom_point()
-
 ```
-
-```{r Data split in B2C and B2B}
+  
+```{r Data split in B2C and B2B, include=FALSE}
 # Split total transactions into b2c and b2b by cutting values defined during cluster analysis
 twocpus <- which(df_comparison$valueprods >= 2)
 twoprints <- which(df_comparison$Printers >= 2)
@@ -342,130 +410,101 @@ tensize <- which(df_comparison$tsize >= 10)
 
 rows_b2b_trans <- unique(c(twocpus, twoprints, twomons, tensize))
 
-head(df_comparison[-c(rows_b2b_trans),])
+paste(length(transactions_raw) - length(rows_b2b_trans))
+paste(length(rows_b2b_trans))
 
 # Create seperate S4 for b2c and b2b
 trans_b2c <- as(df_comparison[-c(rows_b2b_trans), -c(126:130)] == 1, "transactions")
 trans_b2b <- as(df_comparison[c(rows_b2b_trans), -c(126:130)] == 1, "transactions")
 ```
 
-```{r }
+The transactions has been splitted using the cut values found by the use of Cluster analysis. This leads to a total number of transactions in the B2C segment of *`r paste(length(transactions_raw) - length(rows_b2b_trans))`*, whereas *`r paste(length(rows_b2b_trans))`* has been refered to the B2B segment.  
 
-```
-
-    
 <a name="Association rules"></a>  
   
   
 ## 4. Association rules mining 
   
-```{r Looking for rules}
-##Out of the box
-#Define functions to create rules with apriori, remove redundant rules, sort rules and store rules in df
-df_rules_func_on <- function(trans_data, rules_sorted_x, df_rules_x, support, confidence, min) {
-rules_x <- apriori(trans_data, parameter = list(supp = support, conf = confidence, minlen = min, maxlen = 10)) 
-
-rules_sorted_var <- sort(rules_x[!is.redundant(rules_x)], by = "lift", decreasing = TRUE)
-
-df_rules_x <- data.frame(lhs = labels(lhs(rules_sorted_var)), 
-                         rhs = labels(rhs(rules_sorted_var)), 
-                         rules_sorted_var@quality)
-
-df_rules_x$rhs_cat <- NA
-df_rules_x$rhs_brand <- NA
-
-for (i in c(1:nrow(df_rules_x))) {
-    a <- gsub("{", "", df_rules_x[i, which(colnames(df_rules_x) == "rhs")], fixed = T)
-    a2<- gsub("}", "", a, fixed = T)
-    b <- df_names[which(df_names$il_raw == a2) ,which(colnames(df_names) == "category")]
-    c <- df_names[which(df_names$il_raw == a2) ,which(colnames(df_names) == "brand")]
-    df_rules_x[i, which(colnames(df_rules_x) == "rhs_cat")] <- b
-    df_rules_x[i, which(colnames(df_rules_x) == "rhs_brand")] <- c
-    i <- i + 1
-  } 
-  #df_rules_x <- df_rules_x
-  rules_sorted_x <- rules_sorted_var
+```{r Looking for rules, message=FALSE, warning=FALSE, include=FALSE}
+# Define function to create rules with apriori, remove redundant rules, and sort
+rules_func <- function (trans_data, support, confidence, min){
+  rules <- apriori(trans_data, parameter = list(supp = support, conf = confidence, minlen = min, maxlen = 10) 
+                                                #, appearance = list(rhs = c("Apple"))
+                   ) 
+  #rules_sorted <- sort(rules[!is.redundant(rules)], by = "lift", decreasing = TRUE)
 }
 
-df_rules_func_off <- function(trans_data, df_rules_x, support, confidence, min) {
-rules_x <- apriori(trans_data, parameter = list(supp = support , conf = confidence, minlen = min, maxlen = 10))
-rules_sorted_variable <- sort(rules_x[!is.redundant(rules_x)], by = "lift", decreasing = TRUE)
-df_rules_x <- data.frame(lhs = labels(lhs(rules_x)), rhs = labels(rhs(rules_x)), rules_x@quality)
+# Define functions to store rules in df and merge levels
+df_rules_func <- function(rules_sort_x) {
+
+df_rules_x <- data.frame(lhs = labels(lhs(rules_sort_x)), rhs = labels(rhs(rules_sort_x)), 
+                         rules_sort_x@quality)
 }
 
-#Create dfs for all 5 transaction datasets to get 5 df of rules
-df_rules_product <- df_rules_func_on(trans_data = transactions_raw, 
-                                     rules_sorted_x = rules_sorted_product, 
-                                     df_rules_x = df_rules_product, 
-                                     supp = 0.005, conf = 0.4, min = 2)
 
-df_rules_category <- df_rules_func_off(trans_data = trans_category, df_rules_x = df_rules_category, 
-                                     support = 0.015, confidence = 0.75, min = 2 )
-df_rules_brand <- df_rules_func_off(trans_data = trans_brand, df_rules_x = df_rules_category, 
-                                     support = 0.015, confidence = 0.70, min = 2 )
-df_rules_b2c <- df_rules_func_on(trans_data = trans_b2c, df_rules_x = df_rules_b2c,
-                                 support = 0.0003, confidence = 0.40, min = 2 )
-df_rules_b2b <- df_rules_func_on(trans_data = trans_b2b, df_rules_x = df_rules_b2c,
-                                 support = 0.003, confidence = 0.70, min = 2 )
+# Create rules for 5 sets
+rules_sort_product <- rules_func(transactions_raw, support = 0.01, confidence = 0.4, min = 2)
+rules_sort_category <- rules_func(trans_category, support = 0.05, confidence = 0.4, min = 2)
+rules_sort_brand <- rules_func(trans_brand, support = 0.05, confidence = 0.40, min = 1)
+rules_sort_b2c <- rules_func(trans_b2c, support = 0.001, confidence = 0.40, min = 2)
+rules_sort_b2b <- rules_func(trans_b2b, support = 0.01, confidence = 0.55, min = 2)
 
-arulesViz::ruleExplorer(rules_sorted)
+# Create dfs for all 5 sets 
+df_rules_product <- df_rules_func(rules_sort_product)
+df_rules_category <- data.frame(lhs = labels(lhs(rules_sort_category)), rhs = labels(rhs(rules_sort_category)), 
+                         rules_sort_category@quality)
+df_rules_brand <- data.frame(lhs = labels(lhs(rules_sort_brand)), rhs = labels(rhs(rules_sort_brand)), 
+                         rules_sort_brand@quality)
+df_rules_b2c <- df_rules_func(rules_sort_b2c)
+df_rules_b2b <- df_rules_func(rules_sort_b2b)
+
+
+#arulesViz::ruleExplorer(rules_sort_product)
+
 
 ## Select specific rules per item
-ItemRules <- subset(rules_unique, items %in% "iMac")
+ItemRules <- subset(rules_sort_product, items %in% "iMac")
 inspect(ItemRules)
 ```
 
-```{r Visualization}
-plot(rules_sorted)
-inspectDT(rules_sorted)                #interactive inspect
-plotly_arules(rules_sorted[1:5],       #for interactive plots
-              engine = "htmlwidget")   #interactive plot 
-plot(rules_sorted[1:5], method = "two-key plot", control = list(type = "items", reorder = TRUE))
-plot(rules_sorted[1:10], method = "paracoord", control = list(type = "items", reorder = TRUE))
-plot(rules_sorted[1:5], method = "graph", control = list(type = "items", reorder = TRUE))
+```{r Visualization - Scatter, echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
+plot(rules_sort_product, main = "Scatterplot - product level") + 
+  plot(rules_sort_category, main = "Scatterplot - category level") + 
+  plot(rules_sort_brand, main = "Scatterplot - brand level") + 
+  plot(rules_sort_b2c, main = "Scatterplot - segment level b2c") +
+  plot(rules_sort_b2b, main = "Scatterplot - segment level b2b")
 ```
-
-```{r}
-rules <- apriori(trans_category, parameter = list(supp = 0.0015, conf = 0.75, minlen = 1, maxlen = 10))
-func_redundant(rules)
-func_sort(rules, "lift")
-inspect(head(rules_sorted, 10))
-summary(rules_sorted)
-
-plot(rules_sorted)
-inspectDT(rules_sorted)                #interactive inspect
-plotly_arules(rules_sorted[1:5],       #for interactive plots
-              engine = "htmlwidget")   #interactive plot
-
-
-plot(rules_sorted[1:5], method = "two-key plot", control = list(type = "items", reorder = TRUE))
-plot(rules_sorted[1:10], method = "paracoord", control = list(type = "items", reorder = TRUE))
-plot(rules_sorted[1:5], method = "graph", control = list(type = "items", reorder = TRUE))
-```
-
-
-```{r}
-rules <- apriori(trans_brand, parameter = list(supp = 0.015, conf = 0.75, minlen = 2, maxlen = 10))
-func_redundant(rules)
-func_sort(rules, "lift")
-inspect(head(rules_sorted, 10))
-summary(rules_sorted)
-
-plot(rules_sorted)
-inspectDT(rules_sorted)                #interactive inspect
-plotly_arules(rules_sorted[1:5],       #for interactive plots
-              engine = "htmlwidget")   #interactive plot 
-plot(rules_sorted[1:5], method = "two-key plot", control = list(type = "items", reorder = TRUE))
-plot(rules_sorted[1:10], method = "paracoord", control = list(type = "items", reorder = TRUE))
-plot(rules_sorted[1:5], method = "graph", control = list(type = "items", reorder = TRUE))
-```
-
+  
+  
 <a name="Selection of rules"></a>  
   
   
 ## 5. Selection of rules
   
-```{r}
-
+```{r message=FALSE, warning=FALSE, include=FALSE}
+df_rules_final <- NULL
+df_rules_final <- cbind(data.frame(No = 1:5, level = "product"), df_rules_product[c(22, 19, 66, 65, 54),])
+df_rules_final <- rbind(df_rules_final, cbind(data.frame(No = 6, level = "category"),
+                                              df_rules_category[c(151),]))
+df_rules_final <- rbind(df_rules_final, cbind(data.frame(No = 7:9, level = "brand"),
+                                              df_rules_brand[c(98, 100, 102),]))
+df_rules_final <- rbind(df_rules_final, cbind(data.frame(No = 10:16, level = "b2c"),
+                                              df_rules_b2c[c(2, 4, 6, 11, 18, 19, 20),]))
+df_rules_final <- rbind(df_rules_final, cbind(data.frame(No = 17:20, level = "b2b"),
+                                              df_rules_b2b[c(88, 99, 101, 110),]))
 ```
+  
+  
+```{r Visualization - Rules graphs, echo=FALSE, message=FALSE, warning=FALSE, results = 'hide'}
+plot(rules_sort_product[22], method = "graph", control = list(type = "items", reorder = TRUE), main = "Rule - product level")  
+  
+plot(rules_sort_category[151], method = "graph", control = list(type = "items", reorder = TRUE), main = "Rule - category level")  
+  
+plot(rules_sort_brand[c(98, 100)], method = "graph", control = list(type = "items", reorder = TRUE), main = "Rule - brand level")  
+  
+plot(rules_sort_b2c[20], method = "graph", control = list(type = "items", reorder = TRUE), main = "Rule - segment level b2c")  
+  
+plot(rules_sort_b2b[101], method = "graph", control = list(type = "items", reorder = TRUE), main = "Rule - segment level b2b")
+```
+  
 
