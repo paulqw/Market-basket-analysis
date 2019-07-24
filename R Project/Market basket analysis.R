@@ -212,6 +212,11 @@ ggarrange(gg_vol, gg_port, ncol = 1, nrow = 2)
 #-defines the likeliness of occurrence of consequent on the cart given that the cart already has the antecedents
 #--> how like it is that b is purchased if A is purchased as well
 
+#Lift:
+#-Lift controls for the support (frequency) of consequent while calculating the 
+# conditional probability of occurrence of {Y} given {X}. 
+#-Lift is a very literal term given to this measure
+
 ##Out of the box
 #rules cover 10% of the transactions(supp = .1) and are 80% correct (conf = .8)
 rules <- apriori(transactions_raw, parameter = list(supp = 0.0007, conf = 0.90, minlen = 2, maxlen = 10)) #first rules using supp = 0.001 and
