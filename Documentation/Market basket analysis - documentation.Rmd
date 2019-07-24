@@ -54,7 +54,7 @@ xyz
 # Technical documentation  
   
 **Table of contents**  
-1. [Data exploration & pre-processing](#Data exploration & pre-processing)  
+1. [Exploration and preparation of data ](#Exploration and preparation of data )  
     1.1 [Placeholder](#Placeholder)  
 2. [Comparison of product portfolio](#Comparison)  
 3. [Analysis on customer segments (B2C, B2B)](#Customer segments)  
@@ -166,7 +166,7 @@ df_trans_brand <- data.frame(as(trans_brand, "matrix"))
 df_cat_ordered <- df_names[c(order(df_names$category)), ]
 transactions_raw@itemInfo$category <- df_cat_ordered$category
 trans_category <- arules::aggregate(transactions_raw, by = "category")
-df_trans_cat <- data.frame(as(trans_category, "matrix"))
+df_trans_category <- data.frame(as(trans_category, "matrix"))
 
 ```
   
@@ -192,7 +192,6 @@ for (i in be_categories) {
 }
 
 ## Prepare portfolio of Electronidex ##
-df_trans_category <- data.frame(as(trans_category, "matrix"))
 ei_portfolio <- setNames(data.frame(matrix(ncol = ncol(df_trans_category), nrow = 0)), c(colnames(df_trans_category)))
 for (i in c(1:ncol(df_trans_category))){
   ei_portfolio[1,i] <- length(which(df_trans_category[,i] == TRUE))
@@ -341,11 +340,13 @@ twoprints <- which(df_comparison$Printers >= 2)
 twomons <- which(df_comparison$monitors >= 2)
 tensize <- which(df_comparison$tsize >= 10)
 
-rows_b2c_trans <- unique(c(twocpus, twoprints, twomons, tensize))
+rows_b2b_trans <- unique(c(twocpus, twoprints, twomons, tensize))
+
+head(df_comparison[-c(rows_b2b_trans),])
 
 # Create seperate S4 for b2c and b2b
-trans_b2c <- as(df_comparison[rows_b2c_trans, ] == 1, "transactions")
-trans_b2b <- as(df_comparison[-c(twocpus, twomons, twoprints, tensize), ] == 1, "transactions")
+trans_b2c <- as(df_comparison[-c(rows_b2b_trans), -c(126:130)] == 1, "transactions")
+trans_b2b <- as(df_comparison[c(rows_b2b_trans), -c(126:130)] == 1, "transactions")
 ```
 
 ```{r }
@@ -360,40 +361,52 @@ trans_b2b <- as(df_comparison[-c(twocpus, twomons, twoprints, tensize), ] == 1, 
   
 ```{r Looking for rules}
 ##Out of the box
-#rules cover 10% of the transactions(supp = .1) and are 80% correct (conf = .8)
-rules_product <- apriori(transactions_raw, parameter = list(supp = 0.005, conf = 0.4, minlen = 2, maxlen = 10)) 
-rules_category <- apriori(trans_category, parameter = list(supp = 0.015, conf = 0.75, minlen = 2, maxlen = 10))
-rules_brand <- apriori(trans_brand, parameter = list(supp = 0.015, conf = 0.70, minlen = 2, maxlen = 10)) 
-rules_b2c <- apriori(trans_b2c, parameter = list(supp = 0.015, conf = 0.75, minlen = 2, maxlen = 10)) 
-rules_b2b <- apriori(trans_b2b, parameter = list(supp = 0.015, conf = 0.75, minlen = 2, maxlen = 10)) 
+#Define functions to create rules with apriori, remove redundant rules, sort rules and store rules in df
+df_rules_func_on <- function(trans_data, rules_sorted_x, df_rules_x, support, confidence, min) {
+rules_x <- apriori(trans_data, parameter = list(supp = support, conf = confidence, minlen = min, maxlen = 10)) 
 
-# Exclude redundant and sort rules
-rules_sorted_product <- sort(rules_product[!is.redundant(rules_product)], by = "lift", decreasing = TRUE)
-rules_sorted_category <- sort(rules_category[!is.redundant(rules_category)], by = "lift", decreasing = TRUE)
-rules_sorted_brand <- sort(rules_brand[!is.redundant(rules_category)], by = "lift", decreasing = TRUE)
-rules_sorted_b2c <- sort(rules_b2c[!is.redundant(rules_b2c)], by = "lift", decreasing = TRUE)
-rules_sorted_b2b <- sort(rules_b2b[!is.redundant(rules_b2b)], by = "lift", decreasing = TRUE)
+rules_sorted_var <- sort(rules_x[!is.redundant(rules_x)], by = "lift", decreasing = TRUE)
 
-# Check 
-inspect(head(rules_sorted, 10))
-summary(rules_sorted)
-str(rules_sorted)
+df_rules_x <- data.frame(lhs = labels(lhs(rules_sorted_var)), 
+                         rhs = labels(rhs(rules_sorted_var)), 
+                         rules_sorted_var@quality)
 
-# Store rules in df
+df_rules_x$rhs_cat <- NA
+df_rules_x$rhs_brand <- NA
 
-df_rules <- data.frame(lhs = labels(lhs(rules)), rhs = labels(rhs(rules)), rules@quality)
-
-df_rules$rhs_cat <- NA
-df_rules$rhs_brand <- NA
-for (i in c(1:nrow(df_rules))) {
-  a <- gsub("{", "", df_rules[i, which(colnames(df_rules) == "rhs")], fixed = T)
-  a2<- gsub("}", "", a, fixed = T)
-  b <- df_names[which(df_names$il_raw == a2) ,which(colnames(df_names) == "category")]
-  c <- df_names[which(df_names$il_raw == a2) ,which(colnames(df_names) == "brand")]
-  df_rules[i, which(colnames(df_rules) == "rhs_cat")] <- b
-  df_rules[i, which(colnames(df_rules) == "rhs_brand")] <- c
-  i <- i + 1
+for (i in c(1:nrow(df_rules_x))) {
+    a <- gsub("{", "", df_rules_x[i, which(colnames(df_rules_x) == "rhs")], fixed = T)
+    a2<- gsub("}", "", a, fixed = T)
+    b <- df_names[which(df_names$il_raw == a2) ,which(colnames(df_names) == "category")]
+    c <- df_names[which(df_names$il_raw == a2) ,which(colnames(df_names) == "brand")]
+    df_rules_x[i, which(colnames(df_rules_x) == "rhs_cat")] <- b
+    df_rules_x[i, which(colnames(df_rules_x) == "rhs_brand")] <- c
+    i <- i + 1
+  } 
+  #df_rules_x <- df_rules_x
+  rules_sorted_x <- rules_sorted_var
 }
+
+df_rules_func_off <- function(trans_data, df_rules_x, support, confidence, min) {
+rules_x <- apriori(trans_data, parameter = list(supp = support , conf = confidence, minlen = min, maxlen = 10))
+rules_sorted_variable <- sort(rules_x[!is.redundant(rules_x)], by = "lift", decreasing = TRUE)
+df_rules_x <- data.frame(lhs = labels(lhs(rules_x)), rhs = labels(rhs(rules_x)), rules_x@quality)
+}
+
+#Create dfs for all 5 transaction datasets to get 5 df of rules
+df_rules_product <- df_rules_func_on(trans_data = transactions_raw, 
+                                     rules_sorted_x = rules_sorted_product, 
+                                     df_rules_x = df_rules_product, 
+                                     supp = 0.005, conf = 0.4, min = 2)
+
+df_rules_category <- df_rules_func_off(trans_data = trans_category, df_rules_x = df_rules_category, 
+                                     support = 0.015, confidence = 0.75, min = 2 )
+df_rules_brand <- df_rules_func_off(trans_data = trans_brand, df_rules_x = df_rules_category, 
+                                     support = 0.015, confidence = 0.70, min = 2 )
+df_rules_b2c <- df_rules_func_on(trans_data = trans_b2c, df_rules_x = df_rules_b2c,
+                                 support = 0.0003, confidence = 0.40, min = 2 )
+df_rules_b2b <- df_rules_func_on(trans_data = trans_b2b, df_rules_x = df_rules_b2c,
+                                 support = 0.003, confidence = 0.70, min = 2 )
 
 arulesViz::ruleExplorer(rules_sorted)
 
