@@ -18,7 +18,8 @@ p_load(caret, lattice, readr, Metrics, corrplot, e1071, mlr, recipes, ggplot2,
        arulesViz,    # provides visual techniques for the arules package.
        RColorBrewer,
        plyr,
-       here         #relative path
+       here,         #relative path
+       shiny         #dashboard for R
        )
 
 # Enable parallel computing
@@ -163,7 +164,7 @@ df_trans_il_new <- data.frame(as(trans_il_new, "matrix"))
 df_brand_ordered <- df_names[c(order(df_names$brand)), ] 
 # labels of itemLevels needs to be in lexicographical order for apriori as it picks by lexicographical order
 transactions_raw@itemInfo$brand <- df_brand_ordered$brand
-view(trans_brand) <- arules::aggregate(transactions_raw, by = "brand")
+trans_brand <- arules::aggregate(transactions_raw, by = "brand")
 df_trans_brand <- data.frame(as(trans_brand, "matrix"))
 
 ## category
@@ -331,14 +332,9 @@ plot(x = df_comparison$monitors, y = df_comparison$tsize, pch = trans_kmeans_mon
 
 bigdeals <- which(df_comparison$tsize >= 10)
 
-View(bigdeals)
-
 Bigdeals.df <- df_comparison[c(bigdeals),]
 
-View(Bigdeals.df)
-
 ggplot(data = Bigdeals.df, aes(x = Printers, y= tsize)) + geom_point()
-
 ggplot(data = Bigdeals.df, aes(x = monitors, y= tsize)) + geom_point()
 
 ```
@@ -368,7 +364,7 @@ View(b2b.sales)
 ```{r Looking for rules}
 ##Out of the box
 #rules cover 10% of the transactions(supp = .1) and are 80% correct (conf = .8)
-rules <- apriori(trans_category, parameter = list(supp = 0.015, conf = 0.75, minlen = 2, maxlen = 10)) #first rules using supp = 0.001 and
+rules <- apriori(transactions_raw, parameter = list(supp = 0.005, conf = 0.4, minlen = 2, maxlen = 10)) #first rules using supp = 0.001 and
 #0.0009 0.95 --> 98 rules
 inspect(rules)
 
@@ -402,6 +398,18 @@ inspect(head(rules_sorted, 10))
 summary(rules_sorted)
 str(rules)
 
+# Store rules in df
+df_rules <- inspect(rules_sorted)
+df_rules$rhs_cat <- NA
+i <- NULL
+for (i in nrow(df_rules)) {
+  rhs <- as.character(df_rules[i, which(colnames(df_rules) == "rhs")])
+  rhs_cat <- df_names[agrep(rhs, df_names$il_raw, ignore.case = TRUE, value = FALSE, max.distance = ), which(colnames(df_names) == "category")]
+  df_rules[i, which(colnames(df_rules) == "rhs_cat")] <- rhs_cat
+}
+df$rhs_category <- NULL
+
+arulesViz::ruleExplorer(rules_sorted)
 ## Meaning of values:
 #-values too high --> no rules or non-helpful rules
 #-values too low --> computational time/memory will suffer, or too many rules. 
@@ -429,7 +437,7 @@ plot(rules_sorted[1:5], method = "graph", control = list(type = "items", reorder
 ```
 
 ```{r}
-rules <- apriori(transactions_raw, parameter = list(supp = 0.0015, conf = 0.75, minlen = 1, maxlen = 10))
+rules <- apriori(trans_category, parameter = list(supp = 0.0015, conf = 0.75, minlen = 1, maxlen = 10))
 func_redundant(rules)
 func_sort(rules, "lift")
 inspect(head(rules_sorted, 10))
@@ -438,7 +446,9 @@ summary(rules_sorted)
 plot(rules_sorted)
 inspectDT(rules_sorted)                #interactive inspect
 plotly_arules(rules_sorted[1:5],       #for interactive plots
-              engine = "htmlwidget")   #interactive plot 
+              engine = "htmlwidget")   #interactive plot
+
+
 plot(rules_sorted[1:5], method = "two-key plot", control = list(type = "items", reorder = TRUE))
 plot(rules_sorted[1:10], method = "paracoord", control = list(type = "items", reorder = TRUE))
 plot(rules_sorted[1:5], method = "graph", control = list(type = "items", reorder = TRUE))
@@ -461,8 +471,6 @@ plot(rules_sorted[1:10], method = "paracoord", control = list(type = "items", re
 plot(rules_sorted[1:5], method = "graph", control = list(type = "items", reorder = TRUE))
 ```
 
-
-  
 <a name="Selection of rules"></a>  
   
   
