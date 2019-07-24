@@ -155,14 +155,9 @@ for (k in c(1:125)) {
 ```
 
 ```{r Adding itemLevels}
-## il_new (brand and category)
-transactions_raw@itemInfo$il_new <- df_names$il_new     #already ordered
-trans_il_new <- arules::aggregate(transactions_raw, by = "il_new")
-df_trans_il_new <- data.frame(as(trans_il_new, "matrix"))
-
+# labels of itemLevels needs to be in lexicographical order for apriori as it picks by lexicographical order
 ## brand
 df_brand_ordered <- df_names[c(order(df_names$brand)), ] 
-# labels of itemLevels needs to be in lexicographical order for apriori as it picks by lexicographical order
 transactions_raw@itemInfo$brand <- df_brand_ordered$brand
 trans_brand <- arules::aggregate(transactions_raw, by = "brand")
 df_trans_brand <- data.frame(as(trans_brand, "matrix"))
@@ -340,15 +335,17 @@ ggplot(data = Bigdeals.df, aes(x = monitors, y= tsize)) + geom_point()
 ```
 
 ```{r Data split in B2C and B2B}
+# Split total transactions into b2c and b2b by cutting values defined during cluster analysis
 twocpus <- which(df_comparison$valueprods >= 2)
 twoprints <- which(df_comparison$Printers >= 2)
 twomons <- which(df_comparison$monitors >= 2)
-tensize <- which(df_comparison$tsize >= 10)                                                         
+tensize <- which(df_comparison$tsize >= 10)
 
-b2b.sales <- df_comparison[c(twocpus, twomons, twoprints, tensize), ]
+rows_b2c_trans <- unique(c(twocpus, twoprints, twomons, tensize))
 
-View(b2b.sales)
-
+# Create seperate S4 for b2c and b2b
+trans_b2c <- as(df_comparison[rows_b2c_trans, ] == 1, "transactions")
+trans_b2b <- as(df_comparison[-c(twocpus, twomons, twoprints, tensize), ] == 1, "transactions")
 ```
 
 ```{r }
@@ -364,62 +361,41 @@ View(b2b.sales)
 ```{r Looking for rules}
 ##Out of the box
 #rules cover 10% of the transactions(supp = .1) and are 80% correct (conf = .8)
-rules <- apriori(transactions_raw, parameter = list(supp = 0.005, conf = 0.4, minlen = 2, maxlen = 10)) #first rules using supp = 0.001 and
-#0.0009 0.95 --> 98 rules
-inspect(rules)
+rules_product <- apriori(transactions_raw, parameter = list(supp = 0.005, conf = 0.4, minlen = 2, maxlen = 10)) 
+rules_category <- apriori(trans_category, parameter = list(supp = 0.015, conf = 0.75, minlen = 2, maxlen = 10))
+rules_brand <- apriori(trans_brand, parameter = list(supp = 0.015, conf = 0.70, minlen = 2, maxlen = 10)) 
+rules_b2c <- apriori(trans_b2c, parameter = list(supp = 0.015, conf = 0.75, minlen = 2, maxlen = 10)) 
+rules_b2b <- apriori(trans_b2b, parameter = list(supp = 0.015, conf = 0.75, minlen = 2, maxlen = 10)) 
 
-
-#### Functions for redundant and sort ####
-# Check, exclude, sort, and select rules
-func_redundant <- function (trans_data){
-  sum(is.redundant(trans_data))
-  rules_red <- trans_data[which(is.redundant(trans_data))]
-  n_rules_red <- c(which(is.redundant(trans_data)))
-  #inspect(rules_red)
-  
-  # Exclude redundant rules
-  rules_unique <<- trans_data[-c(n_rules_red)]
-} # Inuts: trans_data = file with rules
-# Sort rules in terms of support, confidence, lift
-func_sort <- function (trans_data, by){
-  rules_sorted <<- sort(trans_data, by = by, decreasing = TRUE)
-  #inspect(rules_sorted)
-}  # Inuts: trans_data = file with rules; by = "metric" (e.g.: "support", "confidence", "count")
-
-#### Analysis ####
-# Check for redundant rules and exlude them
-func_redundant(rules)
-
-# Sort rules in terms of support, confidence, lift
-func_sort(rules_unique, "lift")
+# Exclude redundant and sort rules
+rules_sorted_product <- sort(rules_product[!is.redundant(rules_product)], by = "lift", decreasing = TRUE)
+rules_sorted_category <- sort(rules_category[!is.redundant(rules_category)], by = "lift", decreasing = TRUE)
+rules_sorted_brand <- sort(rules_brand[!is.redundant(rules_category)], by = "lift", decreasing = TRUE)
+rules_sorted_b2c <- sort(rules_b2c[!is.redundant(rules_b2c)], by = "lift", decreasing = TRUE)
+rules_sorted_b2b <- sort(rules_b2b[!is.redundant(rules_b2b)], by = "lift", decreasing = TRUE)
 
 # Check 
 inspect(head(rules_sorted, 10))
 summary(rules_sorted)
-str(rules)
+str(rules_sorted)
 
 # Store rules in df
-df_rules <- inspect(rules_sorted)
+
+df_rules <- data.frame(lhs = labels(lhs(rules)), rhs = labels(rhs(rules)), rules@quality)
+
 df_rules$rhs_cat <- NA
-i <- NULL
-for (i in nrow(df_rules)) {
-  rhs <- as.character(df_rules[i, which(colnames(df_rules) == "rhs")])
-  rhs_cat <- df_names[agrep(rhs, df_names$il_raw, ignore.case = TRUE, value = FALSE, max.distance = ), which(colnames(df_names) == "category")]
-  df_rules[i, which(colnames(df_rules) == "rhs_cat")] <- rhs_cat
+df_rules$rhs_brand <- NA
+for (i in c(1:nrow(df_rules))) {
+  a <- gsub("{", "", df_rules[i, which(colnames(df_rules) == "rhs")], fixed = T)
+  a2<- gsub("}", "", a, fixed = T)
+  b <- df_names[which(df_names$il_raw == a2) ,which(colnames(df_names) == "category")]
+  c <- df_names[which(df_names$il_raw == a2) ,which(colnames(df_names) == "brand")]
+  df_rules[i, which(colnames(df_rules) == "rhs_cat")] <- b
+  df_rules[i, which(colnames(df_rules) == "rhs_brand")] <- c
+  i <- i + 1
 }
-df$rhs_category <- NULL
 
 arulesViz::ruleExplorer(rules_sorted)
-## Meaning of values:
-#-values too high --> no rules or non-helpful rules
-#-values too low --> computational time/memory will suffer, or too many rules. 
-#-to find strong rules, increase the value of confidence parameter
-#-minlen = 1 --> rules with one item, means: no matter what other items are involved, 
-#the item in the RHS will appear with the probability given by the rule's confidence (= support)
-#To avoid these rules increase minlen (to 2)
-
-#-lift measures importance of a rule --> high = important rule
-#-Unlike confidence, {I1} -> {I2} is the same as {I2} -> {I1} in the context of the lift measurement
 
 ## Select specific rules per item
 ItemRules <- subset(rules_unique, items %in% "iMac")
