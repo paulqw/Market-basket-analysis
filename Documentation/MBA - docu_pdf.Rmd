@@ -2,11 +2,18 @@
 title: "**Market basket analysis - documentation**"
 subtitle: "Team: Elias and Paul"
 date: "`r Sys.Date()`"
-output: html_document
+output: 
+  pdf_document:
+  df_print: kable
+  toc: true
+  toc_depth: 4
+  number_sections: false
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+options(tinytex.verbose = TRUE)
 ```
   
 ```{r message=FALSE, warning=FALSE, include=FALSE}
@@ -17,7 +24,7 @@ library(pacman)
 p_load(caret, lattice, readr, Metrics, corrplot, e1071, mlr, recipes, ggplot2, 
        C50, party, reshape, dplyr, markdown, ggpubr, tidyr, hydroGOF, BBmisc, 
        tidyverse, textclean, inum, doParallel, Hmisc, caretEnsemble, mboost, 
-       clsuter, ade4, factoextra, asbio, FactoMineR, fpc,e1071, 
+       cluster, ade4, factoextra, asbio, FactoMineR, fpc,e1071, 
        randomForest, rstudioapi, MASS, ParamHelpers, mlr,
        arules,      # analyzing transactional data
        arulesViz,    # provides visual techniques for the arules package.
@@ -171,7 +178,7 @@ itemFrequencyPlot(transactions_raw, topN = 20, type = "absolute", horiz = TRUE,
 
 The following graph visualizes a random sample of the underlying transaction data. Using this depiction, there are apparently no patterns to be observed.  
 
-```{r Image, echo=FALSE, message=FALSE, warning=FALSE, fig.width = 7, fig.asp = 1, fig.align = 'center'}
+```{r Image, echo=FALSE, message=FALSE, warning=FALSE, fig.width = 6, fig.asp = 1.4, fig.align = 'center'}
 # Plot image of distribution of random items
 image(sample(transactions_raw, size = 500)) # of Transactions you'd like to plot))
 ```
@@ -247,7 +254,7 @@ df_trans_category <- data.frame(as(trans_category, "matrix"))
   
 To compare the product portfolios of both companies the selling record is plotted against main product categories. One can clearly state that Blackwell sells a huge amount of Accessories whereas all other categories besides GameConsole and Software are quite low. In comparison to that Electronidex holds a huge stack in PC and Laptops. These are especially considered as strategic selling categories as they over high cross-selling potential for peripherical product categories, primarily Accessories and Speakers. Based on this view on product portfolio synergies could be found with the acquisition as both portoflios supplement each other in several categories.
 
-```{r Portfolio comparison, echo = FALSE, message = FALSE, warning = FALSE}
+```{r Portfolio comparison, echo = FALSE, message = FALSE, warning = FALSE, fig.width = 6, fig.asp = 0.7, fig.align = 'center'}
 #### Compare Blackwell Electronix and Electronidex ####
 ## Prepare portfolio of Blackwell Electronix ##
 #be_portfolio <- rbind(be_ex[, c(1:3, 17:18)],be_new[c(1:4, 7), c(1:3, 17:18)]) #w/ price, margin, and volume
@@ -272,24 +279,18 @@ for (i in c(1:ncol(df_trans_category))){
 ## Merge visualize portfolios from Blackwell and Electronix
 #Merged via excel using be_portoflio and ei_portfolio
 merged_portfolios <- read.csv(file = here("Data", "portfolio_comparison.csv"), header = TRUE)
-merged_portfolios$volume_relative <- NA
-merged_portfolios[which(merged_portfolios[,1] == "Blackwell"), 5] <- 
-  merged_portfolios[which(merged_portfolios[,1] == "Blackwell"), 3]/sum(merged_portfolios$volume[which(merged_portfolios[,1] == "Blackwell")])*100
 
-merged_portfolios[which(merged_portfolios[,1] == "Electronidex"), 5] <- 
-  merged_portfolios[which(merged_portfolios[,1] == "Electronidex"), 3]/sum(merged_portfolios$volume[which(merged_portfolios[,1] == "Electronidex")])*100
-
-ggplot(merged_portfolios, aes(x = category, y = volume_relative)) + 
+ggplot(merged_portfolios, aes(x = category, y = volume)) + 
           facet_grid(company ~.) + 
           geom_col(aes(fill = category)) + 
           scale_color_brewer(palette = "Dark2") +
-          ylim(0, 60) + 
+          ylim(0, 26000) + 
           theme(strip.text = element_text(face="bold", size = 12), 
                 strip.background = element_rect(fill = "lightblue", colour = "black", size = 0.8)) + 
           theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12)) + 
           theme(axis.text = element_text(size = 12)) + 
           theme(axis.title = element_text(size = 15)) +
-          xlab("Product Category") + ylab("Volume(in % of total)") + 
+          xlab("Product Category") + ylab("Volume(Sum)") + 
           ggtitle("Product portfolio of Blackwell and Electronix") + 
           theme(title = element_text(size = 15)) + 
           theme(legend.position = "none")
@@ -395,7 +396,7 @@ Bigdeals.df <- df_comparison[c(bigdeals),]
 To revail patterns for different customer segments, i.e. B2C and B2B, the transaction dataset has been splitted. This seemed to be meaningful in terms of getting insights on customer buying patterns in relation to certain valueable products (i.e. PC and Laptop), transaction size. Besides this the cluster takes Printer and Monitor into account as they are frequently used in business environments and thus considered to be a good indicator. As the data gives no information on customer segment the split has been done using predefined cut values. These cut values are found in a previous cluster analysis applying kmeans cluster algorithm.  
 
 
-```{r Visualization of cluster analysis, echo=FALSE, message=FALSE, warning=FALSE, results = 'hide'}
+```{r Visualization of cluster analysis, echo=FALSE, message=FALSE, warning=FALSE, results = 'hide', fig.width = 4, fig.asp = 0.7, fig.align = 'center'}
 # Visualization 
 plot(x = df_comparison$valueprods, y = df_comparison$tsize, pch = trans_kmeans_big$cluster) +
 points(trans_kmeans_big$centers, pch = 8, cex =3)
@@ -425,7 +426,20 @@ trans_b2b <- as(df_comparison[c(rows_b2b_trans), -c(126:130)] == 1, "transaction
 ```
 
 The transactions has been splitted using the cut values found by the use of Cluster analysis. This leads to a total number of transactions in the B2C segment of *`r paste(length(transactions_raw) - length(rows_b2b_trans))`*, whereas *`r paste(length(rows_b2b_trans))`* has been refered to the B2B segment.  
-
+  
+The item frequency plots reveal the preferred products for consumers and business customers.  
+  
+```{r itemFrequ for b2c b2b, echo=FALSE, message=FALSE, warning=FALSE, results = 'hide', fig.align = 'center', fig.width = 5, fig.asp = 0.7}
+itemFrequencyPlot(trans_b2c, topN = 10, type = "absolute", horiz = TRUE, 
+                  col = brewer.pal(8,'Pastel2'), main = "Frequency of Top 10 items b2c segment", 
+                  xlab = "Item frequency")
+itemFrequencyPlot(trans_b2b, topN = 10, type = "absolute", horiz = TRUE, 
+                  col = brewer.pal(8,'Pastel2'), main = "Frequency of Top 10 items b2b segment", 
+                  xlab = "Item frequency")
+```
+  
+  
+  
 <a name="Association rules"></a>  
   
   
@@ -447,6 +461,7 @@ df_rules_x <- data.frame(lhs = labels(lhs(rules_sort_x)), rhs = labels(rhs(rules
                          rules_sort_x@quality)
 }
 
+
 # Create rules for 5 sets
 rules_sort_product <- rules_func(transactions_raw, support = 0.01, confidence = 0.4, min = 2)
 rules_sort_category <- rules_func(trans_category, support = 0.05, confidence = 0.4, min = 2)
@@ -466,20 +481,13 @@ df_rules_b2b <- df_rules_func(rules_sort_b2b)
 
 #arulesViz::ruleExplorer(rules_sort_product)
 
-library('devtools')
-library('shiny')
-source_gist(id='706a28f832a33e90283b')
 
-inspectDT(rules_sort_product)  
-arulesViz::ruleExplorer()
-
-aru
 ## Select specific rules per item
 ItemRules <- subset(rules_sort_product, items %in% "iMac")
 inspect(ItemRules)
 ```
 
-```{r Visualization - Scatter, echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
+```{r Visualization - Scatter, echo=FALSE, message=FALSE, warning=FALSE, results='hide', fig.width = 6, fig.asp = 0.7, fig.align = 'center'}
 plot(rules_sort_product, main = "Scatterplot - product level") + 
   plot(rules_sort_category, main = "Scatterplot - category level") + 
   plot(rules_sort_brand, main = "Scatterplot - brand level") + 
