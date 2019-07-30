@@ -22,7 +22,6 @@ options(scipen = 999)
 #### Loading data ####
 current_path = getActiveDocumentContext()$path
 setwd(dirname(current_path))
-getwd()
 setwd("..")
 setwd("Data")
 
